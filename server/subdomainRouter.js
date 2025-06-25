@@ -60,35 +60,11 @@ const subdomainConfigs = {
       description: 'Restore old, damaged, or faded photos using advanced AI',
       features: ['Scratch removal', 'Color restoration', 'Damage repair'],
       formFields: {
-        damageType: {
-          type: 'checkbox',
-          label: 'Damage Type',
-          options: [
-            { value: 'scratches', label: 'Scratches & Tears' },
-            { value: 'fading', label: 'Fading & Discoloration' },
-            { value: 'water', label: 'Water Damage' },
-            { value: 'missing', label: 'Missing Parts' },
-            { value: 'aging', label: 'General Aging' }
-          ]
-        },
-        enhancementLevel: {
-          type: 'slider',
-          label: 'Enhancement Level',
-          min: 1,
-          max: 3,
-          step: 1,
-          labels: ['Light Touch-up', 'Moderate Restoration', 'Heavy Reconstruction'],
-          required: true
-        },
         colorization: {
           type: 'toggle',
-          label: 'Colorization Option',
+          label: 'Colorize Photo',
+          description: 'Automatically add color to black and white photos',
           default: false
-        },
-        batchProcessing: {
-          type: 'checkbox',
-          label: 'Batch Processing',
-          options: [{ value: 'batch', label: 'Enable batch processing' }]
         }
       },
       seo: {
@@ -249,15 +225,16 @@ const subdomainConfigs = {
       },
       
       restore: (opts) => {
-        let prompt = 'Restore and enhance old damaged photograph';
-        const damageTypes = opts.damageType || [];
-        if (damageTypes.length > 0) {
-          prompt += `, fix ${damageTypes.join(', ')}`;
-        }
+        let prompt = 'Restore this damaged vintage photograph. The image has significant age-related damage including possibly: Heavy fading and uneven exposure Yellow/brown discoloration and age spots Loss of contrast and detail Damaged/faded edges Various stains and marks throughout Please perform professional photo restoration to: Enhance clarity and sharpness while preserving the vintage aesthetic Correct exposure and contrast issues Remove age spots, stains, and discoloration Repair damaged areas and edges Restore facial features and clothing details Maintain the historical authenticity and time period character ';
+        
         if (opts.colorization) {
-          prompt += ', add natural colors';
+          prompt += 'naturally, and heavily, colorize the image while matching shading and hues expected. ';
+        } else {
+          prompt += 'If the photo has minimal color, apply a consistent black and white color. If the image is color, repair the color palette to be consistent. ';
         }
-        prompt += ', preserve original details, high quality restoration';
+        
+        prompt += 'Preserve any important details visible in the original Output: High-quality restored vintage photograph that looks like a well-preserved original from the same time period.';
+        
         return prompt;
       },
       

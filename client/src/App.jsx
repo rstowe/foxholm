@@ -44,6 +44,12 @@ function App() {
     fetchSubdomainConfig();
   }, []);
 
+  // Debug: Log form fields and state changes
+  useEffect(() => {
+    console.log('Form fields:', subdomainConfig?.formFields);
+    console.log('Form data:', formData);
+  }, [subdomainConfig, formData]);
+
   const fetchSubdomainConfig = async () => {
     try {
       // Extract subdomain from the current hostname
@@ -204,12 +210,20 @@ function App() {
                     />
 
                     {/* Dynamic form based on subdomain */}
-                    {uploadedImage && (
-                      <DynamicForm
-                        fields={subdomainConfig.formFields}
-                        values={formData}
-                        onChange={handleFormChange}
-                      />
+                    {uploadedImage && subdomainConfig?.formFields && (
+                      <div className="form-container">
+                        {Object.keys(subdomainConfig.formFields).length > 0 ? (
+                          <DynamicForm
+                            fields={subdomainConfig.formFields}
+                            values={formData}
+                            onChange={handleFormChange}
+                          />
+                        ) : (
+                          <div className="no-fields-message">
+                            No customization options available for this service.
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {/* Submit button */}

@@ -212,7 +212,7 @@ class ImageProcessor {
         prompt: prompt,
         width: params.width || this.defaultParams.width,
         height: params.height || this.defaultParams.height,
-        steps: params.steps || 30, // FLUX.1-kontext-pro benefits from more steps
+        steps: params.steps || 39, // FLUX.1-kontext-pro benefits from more steps
         n: 1,
         seed: params.seed || Math.floor(Math.random() * 10000000) // For reproducibility
       };
@@ -241,7 +241,7 @@ class ImageProcessor {
       
       console.log('Sending request to Together AI with options:', {
         model: requestOptions.model,
-        prompt: requestOptions.prompt.substring(0, 100) + '...',
+        prompt: requestOptions.prompt,
         width: requestOptions.width,
         height: requestOptions.height,
         steps: requestOptions.steps,
