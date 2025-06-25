@@ -15,6 +15,23 @@ class ImageProcessor {
       width: 1024,
       height: 1024
     };
+    
+    // Model configuration for different operations
+    // FLUX.1-kontext-pro supports image-to-image via image_url parameter
+    this.modelConfig = {
+      headshot: {
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        supportsImage: true // FLUX.1-kontext-pro supports img2img with image_url
+      },
+      restore: {
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        supportsImage: true
+      },
+      upscale: {
+        model: 'black-forest-labs/FLUX.1-kontext-pro',
+        supportsImage: true
+      }
+    };
   }
 
   async processImage(subdomain, imageData, options) {
@@ -54,18 +71,13 @@ class ImageProcessor {
 
   async processHeadshot(imageData, prompt, options) {
     try {
-      // For headshot, we'll use image-to-image generation
-      // First, prepare the image
-      const processedImage = await this.preprocessImage(imageData, {
-        width: 512,
-        height: 512,
-        format: options.outputFormat
-      });
-
-      // Generate with Together AI
+      // Generate with Together AI using image-to-image
       const response = await this.generateWithTogetherAI(prompt, {
+        image: imageData,
         width: options.outputFormat === 'square' ? 512 : 512,
-        height: options.outputFormat === 'square' ? 512 : 640
+        height: options.outputFormat === 'square' ? 512 : 640,
+        subdomain: 'headshot',
+        strength: 0.75 // Adjust transformation strength for headshots
       });
 
       return {
@@ -74,6 +86,7 @@ class ImageProcessor {
         processingDetails: {
           prompt,
           options,
+          model: response.model,
           timestamp: new Date().toISOString()
         }
       };
@@ -91,10 +104,13 @@ class ImageProcessor {
       // Enhance the prompt based on analysis
       const enhancedPrompt = `${prompt}, ${analysis.damageDescription}`;
       
-      // Generate restoration
+      // Generate restoration with source image
       const response = await this.generateWithTogetherAI(enhancedPrompt, {
+        image: imageData,
         width: 1024,
-        height: 1024
+        height: 1024,
+        subdomain: 'restore',
+        strength: 0.8 // Higher strength for restoration
       });
 
       return {
@@ -104,6 +120,7 @@ class ImageProcessor {
         processingDetails: {
           prompt: enhancedPrompt,
           options,
+          model: response.model,
           timestamp: new Date().toISOString()
         }
       };
@@ -123,10 +140,13 @@ class ImageProcessor {
       const targetWidth = Math.min(dimensions.width * scale, 4096);
       const targetHeight = Math.min(dimensions.height * scale, 4096);
 
-      // Generate upscaled version
+      // Generate upscaled version with source image
       const response = await this.generateWithTogetherAI(prompt, {
+        image: imageData,
         width: targetWidth,
-        height: targetHeight
+        height: targetHeight,
+        subdomain: 'upscale',
+        strength: 0.6 // Lower strength to preserve details during upscaling
       });
 
       return {
@@ -141,6 +161,7 @@ class ImageProcessor {
           prompt,
           options,
           scale,
+          model: response.model,
           timestamp: new Date().toISOString()
         }
       };
@@ -155,42 +176,133 @@ class ImageProcessor {
       console.log('🚀 Generating image with Together AI...');
       console.log('API Key:', process.env.TOGETHER_API_KEY ? 'Present' : 'Missing');
       
-      const requestOptions = {
+      // Get model configuration for the subdomain
+      const modelInfo = params.subdomain ? this.modelConfig[params.subdomain] : {
         model: 'black-forest-labs/FLUX.1-kontext-pro',
+        supportsImage: true
+      };
+      
+      // Clean and prepare the base64 image if provided
+      let imageUrl = null;
+      if (params.image && modelInfo.supportsImage) {
+        // Remove data URL prefix if present to get clean base64
+        const base64Data = params.image.replace(/^data:image\/[a-zA-Z]+;base64,/, '');
+        
+        // Validate base64 data
+        try {
+          const buffer = Buffer.from(base64Data, 'base64');
+          console.log(`Image data size: ${buffer.length} bytes`);
+          
+          // Create a data URL for the image_url parameter
+          // Try with the full data URL format
+          imageUrl = params.image.startsWith('data:') 
+            ? params.image 
+            : `data:image/png;base64,${base64Data}`;
+            
+          console.log('Created image URL for API:', imageUrl.substring(0, 100) + '...');
+        } catch (error) {
+          console.error('Invalid base64 image data:', error);
+          throw new Error('Invalid image data provided');
+        }
+      }
+      
+      // Build request parameters for FLUX.1-kontext-pro
+      const requestOptions = {
+        model: modelInfo.model,
         prompt: prompt,
         width: params.width || this.defaultParams.width,
         height: params.height || this.defaultParams.height,
-        steps: 4,
+        steps: params.steps || 30, // FLUX.1-kontext-pro benefits from more steps
         n: 1,
-        safety_checker: false
+        seed: params.seed || Math.floor(Math.random() * 10000000) // For reproducibility
       };
       
-      console.log('Sending request to Together AI with options:', JSON.stringify(requestOptions, null, 2));
+      // Add image_url for image-to-image generation if model supports it
+      if (imageUrl && modelInfo.supportsImage) {
+        // FLUX.1-kontext-pro uses image_url parameter
+        requestOptions.image_url = imageUrl;
+        
+        // Add additional parameters for control
+        if (params.strength !== undefined) {
+          requestOptions.strength = params.strength;
+        }
+        if (params.guidance_scale !== undefined) {
+          requestOptions.guidance_scale = params.guidance_scale;
+        }
+        
+        console.log(`Using image-to-image mode with FLUX.1-kontext-pro`);
+        console.log('Image parameters:', {
+          hasImageUrl: !!requestOptions.image_url,
+          imageUrlLength: imageUrl.length,
+          strength: requestOptions.strength,
+          guidance_scale: requestOptions.guidance_scale
+        });
+      }
       
+      console.log('Sending request to Together AI with options:', {
+        model: requestOptions.model,
+        prompt: requestOptions.prompt.substring(0, 100) + '...',
+        width: requestOptions.width,
+        height: requestOptions.height,
+        steps: requestOptions.steps,
+        hasImageUrl: !!requestOptions.image_url,
+        seed: requestOptions.seed
+      });
+      
+      // Make the API request
       const response = await this.together.images.create(requestOptions);
 
-      console.log('Received response from Together AI:', JSON.stringify({
-        data: {
-          hasData: !!response.data,
-          items: response.data ? response.data.length : 0
-        }
-      }, null, 2));
+      console.log('Received response from Together AI:', {
+        hasData: !!response.data,
+        dataLength: response.data ? response.data.length : 0
+      });
 
       if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
-        console.error('❌ Invalid response structure from Together AI:', JSON.stringify(response, null, 2));
+        console.error('❌ Invalid response structure from Together AI');
+        console.error('Full response:', JSON.stringify(response, null, 2));
         throw new Error('Invalid response structure from Together AI');
       }
 
       const firstImage = response.data[0];
-      console.log('First image data:', JSON.stringify(firstImage, null, 2));
+      console.log('Image generation successful');
 
+      // Return the URL or base64 data
       return {
-        imageUrl: firstImage.url || firstImage.b64_json,
+        imageUrl: firstImage.url || `data:image/png;base64,${firstImage.b64_json}`,
         model: requestOptions.model,
-        prompt: requestOptions.prompt
+        prompt: requestOptions.prompt,
+        seed: requestOptions.seed, // Return seed for reproducibility
+        usedImg2Img: !!imageUrl
       };
     } catch (error) {
       console.error('Together AI generation error:', error);
+      console.error('Full error object:', error);
+      
+      // Provide more specific error messages
+      if (error.response) {
+        console.error('API Response Error:', {
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data
+        });
+        
+        if (error.response.status === 401) {
+          throw new Error('Invalid API key. Please check your Together AI API key.');
+        } else if (error.response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again later.');
+        } else if (error.response.status === 400) {
+          console.error('Bad request - possible issues with image_url format');
+          // If data URL doesn't work, suggest alternative
+          if (imageUrl && imageUrl.startsWith('data:')) {
+            throw new Error('The API may not accept data URLs. Consider implementing image upload to get a proper URL.');
+          }
+          throw new Error('Invalid request parameters. Please check image format and size.');
+        } else if (error.response.status === 422) {
+          console.error('Unprocessable entity - check model capabilities');
+          throw new Error('The model parameters are invalid. Please check the Together AI documentation.');
+        }
+      }
+      
       throw error;
     }
   }
@@ -206,8 +318,27 @@ class ImageProcessor {
       const canvas = Canvas.createCanvas(options.width, options.height);
       const ctx = canvas.getContext('2d');
       
-      // Draw and resize
-      ctx.drawImage(img, 0, 0, options.width, options.height);
+      // Calculate aspect ratio preserving dimensions
+      const aspectRatio = img.width / img.height;
+      let drawWidth = options.width;
+      let drawHeight = options.height;
+      let offsetX = 0;
+      let offsetY = 0;
+      
+      if (aspectRatio > options.width / options.height) {
+        drawHeight = options.width / aspectRatio;
+        offsetY = (options.height - drawHeight) / 2;
+      } else {
+        drawWidth = options.height * aspectRatio;
+        offsetX = (options.width - drawWidth) / 2;
+      }
+      
+      // Fill background (white)
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, options.width, options.height);
+      
+      // Draw image centered and aspect ratio preserved
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
       
       // Convert back to base64
       const processedBase64 = canvas.toDataURL('image/png');
@@ -219,12 +350,17 @@ class ImageProcessor {
   }
 
   async analyzeImageDamage(imageData) {
-    // Simple placeholder analysis - in production, this would use computer vision
+    // Enhanced analysis placeholder - in production, this would use computer vision
+    // Could potentially use a vision model API for real damage detection
     return {
-      damageDetected: ['fading', 'scratches'],
+      damageDetected: ['fading', 'scratches', 'tears', 'discoloration'],
       damageLevel: 'moderate',
-      damageDescription: 'vintage photograph with moderate fading and minor scratches',
-      recommendedEnhancement: 'moderate'
+      damageDescription: 'vintage photograph with moderate fading, minor scratches, slight tears, and age-related discoloration',
+      recommendedEnhancement: 'moderate',
+      colorAnalysis: {
+        hasColor: true,
+        dominantTones: ['sepia', 'brown', 'faded']
+      }
     };
   }
 
@@ -236,7 +372,8 @@ class ImageProcessor {
       
       return {
         width: img.width,
-        height: img.height
+        height: img.height,
+        aspectRatio: img.width / img.height
       };
     } catch (error) {
       console.error('Get dimensions error:', error);
