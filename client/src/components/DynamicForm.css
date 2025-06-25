@@ -1,0 +1,469 @@
+/* Form container */
+.dynamic-form {
+  background: var(--foxholm-white);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--foxholm-gray-200);
+  margin-top: 2rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.dynamic-form:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dynamic-form h3 {
+  margin: 0 0 1.5rem 0;
+  color: var(--foxholm-gray-900);
+  font-size: 1.25rem;
+  font-weight: 600;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--foxholm-gray-100);
+}
+
+/* Form fields */
+.form-field {
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.form-field:last-child {
+  margin-bottom: 0;
+}
+
+.form-field label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--foxholm-gray-700);
+  font-size: 0.9375rem;
+  line-height: 1.4;
+}
+
+.required {
+  color: var(--foxholm-red-500);
+  margin-left: 2px;
+  font-weight: 600;
+}
+
+/* Input fields */
+.form-field select,
+.form-field input[type="range"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--foxholm-gray-300);
+  border-radius: 8px;
+  font-size: 0.9375rem;
+  background: white;
+  color: var(--foxholm-gray-800);
+  transition: all 0.2s ease;
+  height: 42px;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.form-field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px 16px;
+  padding-right: 40px;
+}
+
+.form-field select:focus {
+  outline: none;
+  border-color: var(--foxholm-orange-500);
+  box-shadow: 0 0 0 3px var(--foxholm-orange-100);
+}
+
+/* Radio and Checkbox groups */
+.radio-group,
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.radio-option,
+.checkbox-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.radio-option:hover,
+.checkbox-option:hover {
+  background-color: var(--foxholm-gray-50);
+}
+
+.radio-option input,
+.checkbox-option input {
+  margin-right: 0.75rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+/* Slider styles */
+.slider-container {
+  position: relative;
+  padding-top: 1.5rem;
+  padding-bottom: 2rem;
+}
+
+.slider-value {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: var(--foxholm-orange-500);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  min-width: 40px;
+  text-align: center;
+}
+
+input[type="range"] {
+  -webkit-appearance: none; /* WebKit/Blink */
+  -moz-appearance: none;    /* Firefox */
+  appearance: none;         /* Standard */
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--foxholm-gray-200);
+  outline: none;
+  padding: 0;
+  margin: 10px 0;
+  background-color: var(--foxholm-gray-200);
+}
+
+/* Style the thumb for WebKit/Blink browsers */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--foxholm-orange);
+  cursor: pointer;
+  margin-top: -7px;
+}
+
+/* Style the thumb for Firefox */
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--foxholm-orange);
+  cursor: pointer;
+  border: none;
+}
+
+/* Style the track for Firefox */
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--foxholm-gray-200);
+}
+
+/* Style the thumb for MS Edge */
+input[type="range"]::-ms-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--foxholm-orange);
+  cursor: pointer;
+  margin-top: 0;
+}
+
+/* Style the track for MS Edge */
+input[type="range"]::-ms-track {
+  width: 100%;
+  height: 6px;
+  background: transparent;
+  border-color: transparent;
+  color: transparent;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--foxholm-white);
+  border: 2px solid var(--foxholm-orange);
+  cursor: pointer;
+  margin-top: -7px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px var(--foxholm-orange-100);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--foxholm-white);
+  border: 2px solid var(--foxholm-orange-500);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]::-moz-range-track {
+  background: var(--foxholm-gray-200);
+  border-radius: 3px;
+  height: 6px;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  background: var(--foxholm-gray-200);
+  border-radius: 3px;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--foxholm-gray-500);
+  padding: 0 2px;
+}
+
+/* Toggle switch */
+.toggle-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  padding: 0.5rem 0;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.toggle-field:hover {
+  background-color: var(--foxholm-gray-50);
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  margin-left: 12px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--foxholm-gray-300);
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: var(--foxholm-orange-500);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-switch input:focus + .toggle-slider {
+  box-shadow: 0 0 0 3px var(--foxholm-orange-100);
+}
+
+/* Radio and Checkbox custom styles */
+.radio-option input[type="radio"],
+.checkbox-option input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.radio-option .custom-radio,
+.checkbox-option .custom-checkbox {
+  position: relative;
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  border: 2px solid var(--foxholm-gray-400);
+  border-radius: 50%;
+  vertical-align: middle;
+  transition: all 0.2s ease;
+  background-color: white;
+  cursor: pointer;
+}
+
+.checkbox-option .custom-checkbox {
+  border-radius: 4px;
+}
+
+.radio-option:hover .custom-radio,
+.checkbox-option:hover .custom-checkbox {
+  border-color: var(--foxholm-orange-500);
+}
+
+.radio-option input[type="radio"]:checked + .custom-radio,
+.checkbox-option input[type="checkbox"]:checked + .custom-checkbox {
+  border-color: var(--foxholm-orange-500);
+  background-color: var(--foxholm-orange-500);
+}
+
+.radio-option .custom-radio::after,
+.checkbox-option .custom-checkbox::after {
+  content: '';
+  position: absolute;
+  display: none;
+}
+
+.radio-option input[type="radio"]:checked + .custom-radio::after {
+  display: block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checkbox-option input[type="checkbox"]:checked + .custom-checkbox::after {
+  display: block;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.radio-option input[type="radio"]:focus + .custom-radio,
+.checkbox-option input[type="checkbox"]:focus + .custom-checkbox {
+  box-shadow: 0 0 0 3px var(--foxholm-orange-100);
+  outline: none;
+}
+
+/* Form field help text */
+.help-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.8125rem;
+  color: var(--foxholm-gray-500);
+  line-height: 1.4;
+}
+
+/* Form field error state */
+.form-field.error input,
+.form-field.error select,
+.form-field.error textarea {
+  border-color: var(--foxholm-red-500);
+}
+
+.form-field.error input:focus,
+.form-field.error select:focus,
+.form-field.error textarea:focus {
+  box-shadow: 0 0 0 3px var(--foxholm-red-100);
+  border-color: var(--foxholm-red-500);
+}
+
+.error-message {
+  display: block;
+  margin-top: 6px;
+  color: var(--foxholm-red-600);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .dynamic-form {
+    padding: 1.25rem;
+  }
+  
+  .form-field {
+    margin-bottom: 1.25rem;
+  }
+  
+  .radio-option,
+  .checkbox-option {
+    padding: 0.5rem 0.5rem;
+  }
+}
+
+/* Animation for form elements */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.form-field {
+  animation: fadeIn 0.3s ease-out forwards;
+  opacity: 0;
+}
+
+/* Staggered animations for form fields */
+.form-field:nth-child(1) { animation-delay: 0.05s; }
+.form-field:nth-child(2) { animation-delay: 0.1s; }
+.form-field:nth-child(3) { animation-delay: 0.15s; }
+.form-field:nth-child(4) { animation-delay: 0.2s; }
+.form-field:nth-child(5) { animation-delay: 0.25s; }

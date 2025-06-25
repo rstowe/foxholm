@@ -1,0 +1,64 @@
+{
+  "Changes": [
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "foxholm.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z1BKCTXD74EZPE",
+          "DNSName": "YOUR_ALB_DNS_NAME_HERE",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "www.foxholm.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z1BKCTXD74EZPE",
+          "DNSName": "YOUR_ALB_DNS_NAME_HERE",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "headshot.foxholm.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z1BKCTXD74EZPE",
+          "DNSName": "YOUR_ALB_DNS_NAME_HERE",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "restore.foxholm.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z1BKCTXD74EZPE",
+          "DNSName": "YOUR_ALB_DNS_NAME_HERE",
+          "EvaluateTargetHealth": true
+        }
+      }
+    },
+    {
+      "Action": "CREATE",
+      "ResourceRecordSet": {
+        "Name": "upscale.foxholm.com",
+        "Type": "A",
+        "AliasTarget": {
+          "HostedZoneId": "Z1BKCTXD74EZPE",
+          "DNSName": "YOUR_ALB_DNS_NAME_HERE",
+          "EvaluateTargetHealth": true
+        }
+      }
+    }
+  ]
+}
