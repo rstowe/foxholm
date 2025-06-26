@@ -1,5 +1,38 @@
 require('dotenv').config();
-const fastify = require('fastify')({ logger: true });
+// Configure Fastify with increased body limit for image uploads (50MB)
+const fastify = require('fastify')({ 
+  logger: true,
+  bodyLimit: 50 * 1024 * 1024, // 50MB
+  requestTimeout: 120000, // 2 minutes
+  ajv: {
+    customOptions: {
+      allErrors: true,
+      jsonPointers: true
+    }
+  }
+});
+
+// Add hook to handle validation errors
+fastify.setErrorHandler((error, request, reply) => {
+  if (error.validation) {
+    const messages = error.validation.map(err => {
+      if (err.keyword === 'maxLength' && err.dataPath === '.imageData') {
+        return 'Image is too large. Maximum size is 10MB.';
+      }
+      return `${err.dataPath || 'Field'} ${err.message}`.replace(/"/g, "'");
+    });
+    
+    return reply.status(400).send({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'Validation error',
+      validation: messages
+    });
+  }
+  
+  // Default error handling
+  reply.send(error);
+});
 const cors = require('@fastify/cors');
 const fastifyStatic = require('@fastify/static');
 const path = require('path');
@@ -66,16 +99,30 @@ fastify.get('/', async (request, reply) => {
 
 // API Routes
 fastify.register(async function apiRoutes(fastify) {
-  // Main image processing endpoint
+  // Main image processing endpoint with increased body limit
   fastify.post('/api/process-image', {
+    config: {
+      // Increase payload limit specifically for this route
+      bodyLimit: 50 * 1024 * 1024, // 50MB
+      requestTimeout: 120000 // 2 minutes
+    },
     schema: {
       body: {
         type: 'object',
         required: ['subdomain', 'imageData'],
         properties: {
-          subdomain: { type: 'string' },
-          imageData: { type: 'string' }, // base64
-          options: { type: 'object' }
+          subdomain: { 
+            type: 'string',
+            minLength: 1
+          },
+          imageData: { 
+            type: 'string',
+            maxLength: 50 * 1024 * 1024 // 50MB
+          },
+          options: { 
+            type: 'object',
+            default: {}
+          }
         }
       }
     }

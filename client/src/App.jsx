@@ -22,13 +22,12 @@ const store = configureStore({
 });
 
 // Foxholm Logo Component
-const FoxholmLogo = () => (
-  <div className="logo">
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path d="M16 2L20.5 11L30 11L22.5 17.5L26 26.5L16 20L6 26.5L9.5 17.5L2 11L11.5 11L16 2Z" 
-            fill="white" stroke="white" strokeWidth="1.5" strokeLinejoin="round"/>
-    </svg>
-  </div>
+const FoxholmLogo = ({ className = '' }) => (
+  <img 
+    src="/logo.png" 
+    alt="Foxholm" 
+    className={`logo ${className}`}
+  />
 );
 
 function App() {
@@ -175,17 +174,16 @@ function App() {
   return (
     <Provider store={store}>
       <div className="app">
-        {/* Professional Header */}
+        {/* Background effect layer */}
+        <div className="background-effect"></div>
+
+        {/* Modern Dark Header */}
         <header className="app-header">
           <div className="header-container">
             <div className="logo-section">
               <FoxholmLogo />
-              <div>
-                <h1>Foxholm</h1>
-                <p className="header-tagline">AI Image Studio</p>
-              </div>
             </div>
-            {!result && (
+            {!result && subdomainConfig && (
               <div className="header-content">
                 <h2>{subdomainConfig.title}</h2>
                 <p className="header-description">{subdomainConfig.description}</p>
@@ -196,106 +194,70 @@ function App() {
 
         <main className="app-main">
           <div className="app-container">
-
-
-            {/* Main Content Area */}
+            {/* Main content grid */}
             <div className="content-wrapper">
-              <div className="main-content">
-                {!result ? (
-                  <>
-                    {/* Image uploader */}
-                    <ImageUploader
-                      onImageUpload={handleImageUpload}
-                      uploadedImage={uploadedImage}
-                    />
+              {!result ? (
+                <>
+                  {/* Upload Section */}
+                  <div className="image-uploader-container">
+                    <div className="glass-card glow-hover">
+                      <ImageUploader
+                        onImageUpload={handleImageUpload}
+                        uploadedImage={uploadedImage}
+                      />
+                    </div>
+                  </div>
 
-                    {/* Dynamic form based on subdomain */}
-                    {uploadedImage && subdomainConfig?.formFields && (
-                      <div className="form-container">
-                        {Object.keys(subdomainConfig.formFields).length > 0 ? (
-                          <DynamicForm
-                            fields={subdomainConfig.formFields}
-                            values={formData}
-                            onChange={handleFormChange}
-                          />
+                  {/* Settings Section */}
+                  <div className="form-container">
+                    <div className="glass-card">
+                      {subdomainConfig?.formFields && Object.keys(subdomainConfig.formFields).length > 0 ? (
+                        <DynamicForm
+                          fields={subdomainConfig.formFields}
+                          values={formData}
+                          onChange={handleFormChange}
+                        />
+                      ) : (
+                        <div className="no-fields-message">
+                          No customization options available for this service.
+                        </div>
+                      )}
+                      
+                      {/* Generate button */}
+                      <button
+                        className="btn btn-primary generate-button"
+                        onClick={handleSubmit}
+                        disabled={!uploadedImage || processing}
+                        style={{ width: '100%', marginTop: '2rem' }}
+                      >
+                        {processing ? (
+                          <>
+                            <span className="spinner-small"></span>
+                            Processing...
+                          </>
                         ) : (
-                          <div className="no-fields-message">
-                            No customization options available for this service.
-                          </div>
+                          'Generate Enhanced Image'
                         )}
-                      </div>
-                    )}
+                      </button>
+                    </div>
+                  </div>
 
-                    {/* Submit button */}
-                    {uploadedImage && (
-                      <div className="action-buttons">
-                        <button
-                          className="btn btn-primary"
-                          onClick={handleSubmit}
-                          disabled={processing}
-                        >
-                          {processing ? (
-                            <>
-                              <span className="spinner-small"></span>
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <span>🚀</span>
-                              Process Image
-                            </>
-                          )}
-                        </button>
-                        <button
-                          className="btn btn-secondary"
-                          onClick={handleReset}
-                          disabled={processing}
-                        >
-                          Reset
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Error display */}
-                    {error && (
-                      <div className="error-message">
-                        <span className="error-icon">⚠️</span>
-                        {error}
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    {/* Result display */}
-                    <ResultDisplay
-                      result={result}
-                      onReset={handleReset}
-                    />
-                  </>
-                )}
-              </div>
-
-              {/* Side Panel - Tips */}
-              {!result && (
-                <aside className="side-panel">
-                  <h3>Pro Tips</h3>
-                  <div className="tip-item">
-                    <span className="tip-icon">💡</span>
-                    <span className="tip-text">Use high-resolution images for best results</span>
-                  </div>
-                  <div className="tip-item">
-                    <span className="tip-icon">📸</span>
-                    <span className="tip-text">Ensure good lighting in your photos</span>
-                  </div>
-                  <div className="tip-item">
-                    <span className="tip-icon">🎨</span>
-                    <span className="tip-text">Supported formats: JPG, PNG, WebP</span>
-                  </div>
-                  <div className="tip-item">
-                    <span className="tip-icon">⚡</span>
-                    <span className="tip-text">Processing takes 20-30 seconds</span>
-                  </div>
-                </aside>
+                  {/* Error display */}
+                  {error && (
+                    <div className="error-message" style={{ gridColumn: '1 / -1' }}>
+                      <span className="error-icon">⚠️</span>
+                      {error}
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* Result Display */
+                <div className="result-container glass-card">
+                  <ResultDisplay
+                    result={result}
+                    onReset={handleReset}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -306,7 +268,7 @@ function App() {
 
         <footer className="app-footer">
           <div className="footer-content">
-            <FoxholmLogo />
+            <FoxholmLogo className="footer-logo" />
             <p>&copy; 2025 Foxholm. Professional AI Image Studio.</p>
             <div className="footer-links">
               <a href="/privacy">Privacy</a>

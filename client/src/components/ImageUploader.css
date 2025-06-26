@@ -1,29 +1,47 @@
 .image-uploader {
-  margin-bottom: 2rem;
+  width: 100%;
 }
 
 .upload-area {
-  border: 2px dashed var(--foxholm-gray-300);
-  border-radius: var(--radius-lg);
-  padding: 4rem 2rem;
+  background: rgba(242, 101, 34, 0.05);
+  border: 2px dashed rgba(242, 101, 34, 0.3);
+  border-radius: 20px;
+  padding: 3rem 2rem;
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-base);
-  background: var(--foxholm-gray-100);
   position: relative;
   overflow: hidden;
 }
 
+.upload-area::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(242, 101, 34, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
 .upload-area:hover {
   border-color: var(--foxholm-orange);
-  background: var(--foxholm-light-orange);
-  transform: translateY(-2px);
+  background: rgba(242, 101, 34, 0.1);
+  transform: scale(1.02);
+}
+
+.upload-area:hover::before {
+  opacity: 1;
 }
 
 .upload-area.drag-active {
   border-color: var(--foxholm-orange);
-  background: var(--foxholm-light-orange);
+  background: rgba(242, 101, 34, 0.15);
   border-width: 3px;
+  transform: scale(1.02);
 }
 
 .upload-content {
@@ -33,30 +51,36 @@
 }
 
 .upload-icon {
-  font-size: 3rem;
+  font-size: 4rem;
   margin-bottom: 1rem;
-  opacity: 0.8;
+  filter: drop-shadow(0 10px 20px rgba(242, 101, 34, 0.3));
+  display: inline-block;
+  animation: float 3s ease-in-out infinite;
 }
 
-.upload-area h3 {
-  font-size: 1.5rem;
-  color: var(--foxholm-black);
-  margin-bottom: 0.5rem;
-  font-weight: 600;
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .upload-area p {
-  color: var(--foxholm-gray-600);
-  font-size: 1rem;
+  color: var(--foxholm-text-primary);
+  font-size: 1.125rem;
   margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .upload-hint {
   font-size: 0.875rem;
-  color: var(--foxholm-gray-500);
-  font-weight: 500;
+  color: var(--foxholm-text-tertiary);
+  font-weight: 400;
 }
 
+/* Preview area */
 .preview-area {
   text-align: center;
   animation: fadeIn 0.3s ease-out;
@@ -66,46 +90,70 @@
   position: relative;
   display: inline-block;
   max-width: 100%;
+  margin: 0 auto;
 }
 
 .preview-image {
   max-width: 100%;
-  max-height: 500px;
+  max-height: 400px;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-xl);
-  border: 1px solid var(--foxholm-gray-200);
+  border: 1px solid var(--foxholm-border-primary);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  display: block;
+  margin: 0 auto;
 }
 
 .change-image-btn {
   position: absolute;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  background: var(--foxholm-white);
-  color: var(--foxholm-black);
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: var(--radius-md);
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(10, 10, 10, 0.8);
+  backdrop-filter: blur(10px);
+  color: var(--foxholm-text-primary);
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--foxholm-border-primary);
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font-size: 0.875rem;
-  font-weight: 600;
-  box-shadow: var(--shadow-md);
+  font-weight: 500;
   transition: all var(--transition-fast);
 }
 
 .change-image-btn:hover {
-  background: var(--foxholm-orange);
-  color: white;
+  background: var(--foxholm-gradient);
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-orange);
 }
 
+/* Error state */
 .upload-error {
-  color: #E53E3E;
+  color: #ef4444;
   margin-top: 1rem;
   font-size: 0.875rem;
   font-weight: 500;
   padding: 0.75rem 1rem;
-  background: #FEE;
+  background: rgba(239, 68, 68, 0.1);
   border-radius: var(--radius-md);
-  border: 1px solid #FCC;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .upload-area {
+    padding: 2rem 1.5rem;
+  }
+  
+  .upload-icon {
+    font-size: 3rem;
+  }
+  
+  .upload-area h3 {
+    font-size: 1.125rem;
+  }
+  
+  .preview-image {
+    max-height: 300px;
+  }
 }

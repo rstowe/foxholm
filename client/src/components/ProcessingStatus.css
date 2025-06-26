@@ -4,20 +4,64 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(10, 10, 10, 0.95);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.processing-modal-container {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+  max-width: 900px;
+  width: 90%;
+}
+
+.video-ad-placeholder {
+  width: 360px;
+  height: 450px;
+  background: var(--foxholm-bg-secondary);
+  border: 1px solid var(--foxholm-border-primary);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ad-content {
+  text-align: center;
+  color: var(--foxholm-text-tertiary);
+}
+
+.ad-content span {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.ad-dimensions {
+  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  opacity: 0.3;
 }
 
 .processing-content {
-  background: white;
+  background: var(--foxholm-bg-secondary);
+  border: 1px solid var(--foxholm-border-primary);
   padding: 3rem;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   text-align: center;
-  max-width: 400px;
-  width: 90%;
+  flex: 1;
+  min-width: 320px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
 .processing-spinner {
@@ -31,8 +75,8 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  border: 4px solid transparent;
-  border-top-color: #667eea;
+  border: 3px solid transparent;
+  border-top-color: var(--foxholm-orange);
   border-radius: 50%;
   animation: spin 1.5s linear infinite;
 }
@@ -42,8 +86,9 @@
   height: 60px;
   top: 10px;
   left: 10px;
-  border-top-color: #764ba2;
+  border-top-color: var(--foxholm-orange-light);
   animation-delay: 0.2s;
+  animation-duration: 1.2s;
 }
 
 .spinner-ring:nth-child(3) {
@@ -51,36 +96,121 @@
   height: 40px;
   top: 20px;
   left: 20px;
-  border-top-color: #f093fb;
+  border-top-color: rgba(242, 101, 34, 0.5);
   animation-delay: 0.4s;
+  animation-duration: 1s;
 }
 
 .processing-info h4 {
   margin-bottom: 1rem;
-  color: #2d3748;
+  color: var(--foxholm-text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.processing-info p {
+  color: var(--foxholm-text-secondary);
+  font-size: 0.9375rem;
+  margin-bottom: 1.5rem;
 }
 
 .progress-bar {
   width: 100%;
   height: 6px;
-  background: #e2e8f0;
+  background: var(--foxholm-bg-tertiary);
   border-radius: 3px;
   overflow: hidden;
   margin: 1rem 0;
+  position: relative;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: var(--foxholm-gradient);
   transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .processing-note {
-  font-size: 0.875rem;
-  color: #718096;
+  font-size: 0.8125rem;
+  color: var(--foxholm-text-tertiary);
+  margin-top: 1rem;
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .processing-modal-container {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .video-ad-placeholder {
+    width: 100%;
+    max-width: 360px;
+    height: 300px;
+  }
+  
+  .processing-content {
+    padding: 2rem;
+    width: 100%;
+  }
+  
+  .processing-spinner {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .spinner-ring:nth-child(2) {
+    width: 45px;
+    height: 45px;
+    top: 7.5px;
+    left: 7.5px;
+  }
+  
+  .spinner-ring:nth-child(3) {
+    width: 30px;
+    height: 30px;
+    top: 15px;
+    left: 15px;
+  }
 }

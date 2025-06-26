@@ -8,31 +8,53 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
 
   const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  const MAX_DIMENSION = 4096; // Max width/height in pixels
 
   const handleFile = (file) => {
     setError(null);
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError('Please upload a JPG, PNG, or WebP image');
+      setError('Invalid file type. Please upload a JPG, PNG, or WebP image.');
       return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size must be less than 10MB');
+      setError(`File is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
       return;
     }
 
-    // Read file as base64
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onImageUpload(reader.result);
+    // Create an image element to check dimensions
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      
+      // Validate image dimensions
+      if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
+        setError(`Image dimensions are too large. Maximum size is ${MAX_DIMENSION}x${MAX_DIMENSION}px.`);
+        return;
+      }
+      
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        onImageUpload(reader.result);
+      };
+      reader.onerror = () => {
+        setError('Failed to process image. Please try another file.');
+      };
+      reader.readAsDataURL(file);
     };
-    reader.onerror = () => {
-      setError('Failed to read file');
+    
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      setError('Invalid image file. Please try another file.');
     };
-    reader.readAsDataURL(file);
+    
+    img.src = objectUrl;
   };
 
   const handleDrop = (e) => {
@@ -88,9 +110,8 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
           
           <div className="upload-content">
             <div className="upload-icon">📸</div>
-            <h3>Upload Your Image</h3>
-            <p>Drag and drop or click to browse</p>
-            <p className="upload-hint">JPG, PNG, or WebP • Max 10MB</p>
+            <p>Drop your image here</p>
+            <p className="upload-hint">or click to select • JPG, PNG, GIF</p>
           </div>
         </div>
       ) : (

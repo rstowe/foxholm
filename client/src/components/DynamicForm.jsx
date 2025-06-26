@@ -16,7 +16,7 @@ const DynamicForm = ({ fields, values, onChange }) => {
       case 'select':
         return (
           <div key={fieldName} className={fieldClass}>
-            <label htmlFor={fieldName}>
+            <label htmlFor={fieldName} className="control-label">
               {fieldConfig.label}
               {fieldConfig.required && <span className="required">*</span>}
             </label>
@@ -39,26 +39,26 @@ const DynamicForm = ({ fields, values, onChange }) => {
       case 'radio':
         return (
           <div key={fieldName} className={fieldClass}>
-            <label>
+            <label className="control-label">
               {fieldConfig.label}
               {fieldConfig.required && <span className="required">*</span>}
             </label>
             <div className="radio-group">
               {fieldConfig.options.map((option) => (
-                <label 
-                  key={option.value} 
-                  className={`radio-option ${value === option.value ? 'selected' : ''}`}
-                >
+                <div key={option.value} className="radio-option">
                   <input
                     type="radio"
+                    id={`${fieldName}-${option.value}`}
                     name={fieldName}
                     value={option.value}
                     checked={value === option.value}
                     onChange={(e) => onChange(fieldName, e.target.value)}
                     required={fieldConfig.required}
                   />
-                  <span>{option.label}</span>
-                </label>
+                  <label htmlFor={`${fieldName}-${option.value}`}>
+                    {option.label}
+                  </label>
+                </div>
               ))}
             </div>
           </div>
@@ -67,17 +67,15 @@ const DynamicForm = ({ fields, values, onChange }) => {
       case 'checkbox':
         return (
           <div key={fieldName} className={fieldClass}>
-            <label>{fieldConfig.label}</label>
+            <label className="control-label">{fieldConfig.label}</label>
             <div className="checkbox-group">
               {fieldConfig.options.map((option) => {
                 const isChecked = Array.isArray(value) && value.includes(option.value);
                 return (
-                  <label 
-                    key={option.value} 
-                    className={`checkbox-option ${isChecked ? 'selected' : ''}`}
-                  >
+                  <div key={option.value} className="checkbox-option">
                     <input
                       type="checkbox"
+                      id={`${fieldName}-${option.value}`}
                       value={option.value}
                       checked={isChecked}
                       onChange={(e) => {
@@ -88,8 +86,10 @@ const DynamicForm = ({ fields, values, onChange }) => {
                         onChange(fieldName, newValues);
                       }}
                     />
-                    <span>{option.label}</span>
-                  </label>
+                    <label htmlFor={`${fieldName}-${option.value}`}>
+                      {option.label}
+                    </label>
+                  </div>
                 );
               })}
             </div>
@@ -99,7 +99,7 @@ const DynamicForm = ({ fields, values, onChange }) => {
       case 'slider':
         return (
           <div key={fieldName} className={fieldClass}>
-            <label htmlFor={fieldName}>
+            <label htmlFor={fieldName} className="control-label">
               {fieldConfig.label}
               {fieldConfig.required && <span className="required">*</span>}
             </label>
@@ -118,16 +118,16 @@ const DynamicForm = ({ fields, values, onChange }) => {
                 onChange={(e) => onChange(fieldName, Number(e.target.value))}
                 required={fieldConfig.required}
               />
+              {fieldConfig.labels && (
+                <div className="slider-labels">
+                  {fieldConfig.labels.map((label, index) => (
+                    <span key={index} className="slider-label">
+                      {label}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-            {fieldConfig.labels && (
-              <div className="slider-labels">
-                {fieldConfig.labels.map((label, index) => (
-                  <span key={index} className="slider-label">
-                    {label}
-                  </span>
-                ))}
-              </div>
-            )}
           </div>
         );
 
@@ -135,7 +135,7 @@ const DynamicForm = ({ fields, values, onChange }) => {
         return (
           <div key={fieldName} className={fieldClass}>
             <label className="toggle-field">
-              <span>{fieldConfig.label}</span>
+              <span className="control-label">{fieldConfig.label}</span>
               <div className="toggle-switch">
                 <input
                   type="checkbox"
@@ -155,7 +155,6 @@ const DynamicForm = ({ fields, values, onChange }) => {
 
   return (
     <div className="dynamic-form">
-      <h3>Customize Settings</h3>
       <form onSubmit={(e) => e.preventDefault()}>
         <div className="form-grid">
           {Object.entries(fields).map(([fieldName, fieldConfig]) =>

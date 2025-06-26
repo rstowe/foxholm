@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './ResultDisplay.css';
 
 const ResultDisplay = ({ result, onReset }) => {
+  const resultRef = useRef(null);
   const [showComparison, setShowComparison] = useState(true);
   const [downloadComplete, setDownloadComplete] = useState(false);
+
+  useEffect(() => {
+    // Focus the result display when it appears or when result changes
+    if (result && resultRef.current) {
+      // Using setTimeout to ensure the element is in the DOM and focusable
+      const timer = setTimeout(() => {
+        resultRef.current.focus({ preventScroll: true });
+      }, 100);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [result]);
 
   const handleDownload = async () => {
     try {
@@ -56,24 +69,29 @@ const ResultDisplay = ({ result, onReset }) => {
     }
   };
 
+  // Use a semantic section element for better accessibility
   return (
-    <div className="result-display">
-      <div className="result-header">
-        <h2>Your Image is Ready!</h2>
-        <p>Here's your AI-enhanced image. Download it or try again with different settings.</p>
-      </div>
-
+    <section 
+      className="result-display" 
+      ref={resultRef}
+      tabIndex="-1"
+      role="region"
+      aria-live="polite"
+      aria-atomic="true"
+      aria-label="Image processing results"
+    >
       <div className="result-content">
         {showComparison ? (
           <div className="comparison-view">
-            <div className="image-container original">
-              <h4>Original</h4>
-              <img src={result.originalImage} alt="Original" />
-            </div>
-            <div className="comparison-divider"></div>
+            {/* Enhanced image first for mobile */}
             <div className="image-container processed">
               <h4>Enhanced</h4>
               <img src={result.processedImage} alt="Enhanced" />
+            </div>
+            <div className="comparison-divider"></div>
+            <div className="image-container original">
+              <h4>Original</h4>
+              <img src={result.originalImage} alt="Original" />
             </div>
           </div>
         ) : (
@@ -124,7 +142,7 @@ const ResultDisplay = ({ result, onReset }) => {
 
       <div className="result-actions">
         <button
-          className="btn btn-primary btn-download"
+          className={`btn btn-download ${downloadComplete ? 'download-complete' : ''}`}
           onClick={handleDownload}
         >
           {downloadComplete ? '✓ Downloaded!' : '⬇ Download Image'}
@@ -153,7 +171,7 @@ const ResultDisplay = ({ result, onReset }) => {
           <a href="#" className="social-link">Instagram</a>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
