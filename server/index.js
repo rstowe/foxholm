@@ -34,8 +34,8 @@ fastify.setErrorHandler((error, request, reply) => {
   reply.send(error);
 });
 const cors = require('@fastify/cors');
-const fastifyStatic = require('@fastify/static');
 const path = require('path');
+const fs = require('fs').promises;
 const imageProcessor = require('./imageProcessor');
 const subdomainRouter = require('./subdomainRouter');
 const sitemapGenerator = require('./sitemapGenerator');
@@ -66,35 +66,171 @@ fastify.register(cors, {
   maxAge: 600
 });
 
-// Serve static files
-fastify.register(fastifyStatic, {
-  root: path.join(__dirname, '../dist'),
-  prefix: '/',
-  // Don't serve index.html automatically, we'll handle it with SEO
-  index: false
-});
+// Helper function to wrap HTML content with header and footer
+async function wrapWithTemplate(htmlContent) {
+  try {
+    const headerPath = path.join(__dirname, '../client/static/header.hbs');
+    const footerPath = path.join(__dirname, '../client/static/footer.hbs');
+    
+    const [header, footer] = await Promise.all([
+      fs.readFile(headerPath, 'utf-8'),
+      fs.readFile(footerPath, 'utf-8')
+    ]);
+    
+    // Based on the file structure:
+    // - header.hbs ends with opening <main> tag
+    // - footer.hbs starts with closing </main> tag
+    // So we just need to concatenate: header + content + footer
+    
+    return header + '\n' + htmlContent + '\n' + footer;
+  } catch (error) {
+    fastify.log.error('Error wrapping HTML with template:', error);
+    return htmlContent;
+  }
+}
+
+// Helper function to check if request is from root domain (not subdomain)
+function isRootDomain(host) {
+  if (!host) return true;
+  
+  const hostname = host.split(':')[0];
+  
+  // In development, check for subdomain pattern like "headshot.localhost"
+  if (hostname.endsWith('.localhost')) {
+    return false; // Has subdomain
+  }
+  
+  // Plain localhost or IP is root domain
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return true;
+  }
+  
+  // In production, check if it's the root domain (no subdomain)
+  const parts = hostname.split('.');
+  if (process.env.NODE_ENV === 'production' && process.env.DOMAIN) {
+    const domainParts = process.env.DOMAIN.split('.');
+    return parts.length === domainParts.length;
+  }
+  
+  // Check if subdomain exists
+  const subdomain = subdomainRouter.extractSubdomain(host);
+  return !subdomain; // If no subdomain extracted, it's root domain
+}
 
 // Root route with SEO optimization
 fastify.get('/', async (request, reply) => {
   try {
-    // Extract subdomain from host or query parameter
-    let subdomain = request.query.subdomain || null;
-    if (!subdomain) {
-      subdomain = subdomainRouter.extractSubdomain(request.headers.host);
+    const host = request.headers.host;
+    const isRoot = isRootDomain(host);
+    const subdomain = subdomainRouter.extractSubdomain(host);
+    
+    // Debug logging
+    fastify.log.info(`Host: ${host}, Is Root: ${isRoot}, Subdomain: ${subdomain}`);
+    
+    // Check if this is the root domain or a subdomain
+    if (isRoot) {
+      // Serve the static index.html wrapped with header/footer
+      const indexPath = path.join(__dirname, '../client/static/pages/index.html');
+      const htmlContent = await fs.readFile(indexPath, 'utf-8');
+      const wrappedHTML = await wrapWithTemplate(htmlContent);
+      
+      reply.header('Cache-Control', 'public, max-age=300');
+      reply.header('Vary', 'Accept-Encoding');
+      return reply.type('text/html').send(wrappedHTML);
+    } else {
+      // Existing subdomain behavior - serve React app
+      const optimizedHTML = await seoMiddleware.getOptimizedHTML(subdomain);
+      
+      reply.header('Cache-Control', 'public, max-age=300');
+      reply.header('Vary', 'Accept-Encoding');
+      return reply.type('text/html').send(optimizedHTML);
     }
-    
-    // Get the optimized HTML with the correct subdomain context
-    const optimizedHTML = await seoMiddleware.getOptimizedHTML(subdomain);
-    
-    // Set cache headers
-    reply.header('Cache-Control', 'public, max-age=300'); // 5 minutes
-    reply.header('Vary', 'Accept-Encoding');
-    
-    return reply.type('text/html').send(optimizedHTML);
   } catch (error) {
     request.log.error('Error in root route:', error);
     return reply.code(500).send('Internal Server Error');
   }
+});
+
+// Static page routes for root domain
+const staticPages = [
+  'headshot-creation-tool',
+  'image-restoration-tool',
+  'image-upscale-tool'
+];
+
+// Register routes for static pages
+staticPages.forEach(page => {
+  fastify.get(`/${page}`, async (request, reply) => {
+    try {
+      // Only serve static pages on root domain
+      if (!isRootDomain(request.headers.host)) {
+        // On subdomains, redirect to React app
+        return reply.redirect('/');
+      }
+      
+      const pagePath = path.join(__dirname, '../client/static/pages/', `${page}.html`);
+      const htmlContent = await fs.readFile(pagePath, 'utf-8');
+      const wrappedHTML = await wrapWithTemplate(htmlContent);
+      
+      reply.header('Cache-Control', 'public, max-age=300');
+      reply.header('Vary', 'Accept-Encoding');
+      return reply.type('text/html').send(wrappedHTML);
+    } catch (error) {
+      request.log.error(`Error serving ${page}:`, error);
+      return reply.code(404).send('Page not found');
+    }
+  });
+});
+
+// Serve static assets (images, icons, etc.)
+fastify.get('/:filename', async (request, reply) => {
+  const filename = request.params.filename;
+  
+  // Check if it's a file with an extension
+  if (!filename.includes('.')) {
+    return reply.callNotFound();
+  }
+  
+  const ext = path.extname(filename).toLowerCase();
+  
+  // Define content types
+  const contentTypes = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif': 'image/gif',
+    '.svg': 'image/svg+xml',
+    '.webp': 'image/webp',
+    '.ico': 'image/x-icon',
+    '.txt': 'text/plain',
+    '.webmanifest': 'application/manifest+json',
+    '.json': 'application/json'
+  };
+  
+  // Skip if no valid content type
+  if (!contentTypes[ext]) {
+    return reply.callNotFound();
+  }
+  
+  // Try multiple locations in order
+  const locations = [
+    path.join(__dirname, '../client/static/images', filename),
+    path.join(__dirname, '../dist', filename),
+    path.join(__dirname, '../client/static', filename)
+  ];
+  
+  for (const location of locations) {
+    try {
+      const file = await fs.readFile(location);
+      reply.header('Cache-Control', 'public, max-age=31536000'); // 1 year
+      return reply.type(contentTypes[ext]).send(file);
+    } catch (error) {
+      // Continue to next location
+    }
+  }
+  
+  // File not found in any location
+  return reply.code(404).send('File not found');
 });
 
 // API Routes
@@ -237,7 +373,30 @@ fastify.get('/sitemap.html', async (request, reply) => {
   reply.type('text/html').send(html);
 });
 
-// 404 Handler for API routes
+// Catch-all route for React app assets
+fastify.get('/js/:file', async (request, reply) => {
+  try {
+    const filePath = path.join(__dirname, '../dist/js', request.params.file);
+    const file = await fs.readFile(filePath);
+    reply.header('Cache-Control', 'public, max-age=31536000');
+    return reply.type('application/javascript').send(file);
+  } catch (error) {
+    return reply.code(404).send('File not found');
+  }
+});
+
+fastify.get('/css/:file', async (request, reply) => {
+  try {
+    const filePath = path.join(__dirname, '../dist/css', request.params.file);
+    const file = await fs.readFile(filePath);
+    reply.header('Cache-Control', 'public, max-age=31536000');
+    return reply.type('text/css').send(file);
+  } catch (error) {
+    return reply.code(404).send('File not found');
+  }
+});
+
+// 404 Handler for all unmatched routes
 fastify.setNotFoundHandler(async (request, reply) => {
   if (request.url.startsWith('/api/')) {
     reply.code(404).send({
@@ -245,10 +404,35 @@ fastify.setNotFoundHandler(async (request, reply) => {
       error: 'API endpoint not found'
     });
   } else {
-    // Serve the React app with SEO-optimized HTML for client-side routing
-    const subdomain = subdomainRouter.extractSubdomain(request.headers.host);
-    const optimizedHTML = await seoMiddleware.getOptimizedHTML(subdomain);
-    reply.type('text/html').send(optimizedHTML);
+    // Check if this is root domain or subdomain
+    if (isRootDomain(request.headers.host)) {
+      // On root domain, serve 404 page
+      reply.code(404).send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <title>Page Not Found - Foxholm</title>
+          <style>
+            body { font-family: sans-serif; text-align: center; padding: 50px; }
+            h1 { color: #f26522; }
+            a { color: #f26522; text-decoration: none; }
+            a:hover { text-decoration: underline; }
+          </style>
+        </head>
+        <body>
+          <h1>404 - Page Not Found</h1>
+          <p>The page you're looking for doesn't exist.</p>
+          <p><a href="/">Return to Homepage</a></p>
+        </body>
+        </html>
+      `);
+    } else {
+      // On subdomains, serve the React app with SEO-optimized HTML for client-side routing
+      const subdomain = subdomainRouter.extractSubdomain(request.headers.host);
+      const optimizedHTML = await seoMiddleware.getOptimizedHTML(subdomain);
+      reply.type('text/html').send(optimizedHTML);
+    }
   }
 });
 
@@ -269,6 +453,11 @@ const start = async () => {
     console.log(`Server listening on port ${port}`);
     console.log(`Environment: ${process.env.NODE_ENV}`);
     console.log(`Health check available at: http://localhost:${port}/api/health`);
+    console.log('\nTo test different features:');
+    console.log(`- Root domain: http://localhost:${port}`);
+    console.log(`- Headshot tool: http://headshot.localhost:${port}`);
+    console.log(`- Restore tool: http://restore.localhost:${port}`);
+    console.log(`- Upscale tool: http://upscale.localhost:${port}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

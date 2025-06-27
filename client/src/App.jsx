@@ -180,7 +180,7 @@ function App() {
         {/* Modern Dark Header */}
         <header className="app-header">
           <div className="header-container">
-            <div className="logo-section">
+            <div className="logo-section" onClick={() => window.location.href = '/'}>
               <FoxholmLogo />
             </div>
             {!result && subdomainConfig && (

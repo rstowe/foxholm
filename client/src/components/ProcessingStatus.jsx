@@ -42,29 +42,24 @@ const ProcessingStatus = () => {
           </div>
         </div>
         
-        {/* Processing Content */}
-        <div className="processing-content">
-          <div className="processing-spinner">
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
+        {/* Compact Processing Info Below Ad */}
+        <div className="processing-info-compact">
+          <div className="loading-animation">
+            <div className="loading-bar">
+              <div className="loading-fill" style={{ width: `${progress}%` }}></div>
+              <div className="loading-glow"></div>
+            </div>
           </div>
           
-          <div className="processing-info">
-            <h4>Processing Your Image</h4>
-            <p>{message}</p>
-            
-            <div className="progress-bar">
-              <div 
-                className="progress-fill"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            
-            <p className="processing-note">
-              This usually takes 20-30 seconds
-            </p>
-          </div>
+          <p className="processing-message">
+            {message}
+            <span className="loading-dots">
+              <span className="loading-dot"></span>
+              <span className="loading-dot"></span>
+              <span className="loading-dot"></span>
+            </span>
+          </p>
+          <p className="processing-time">Processing time: 20-30 seconds</p>
         </div>
       </div>
     </div>

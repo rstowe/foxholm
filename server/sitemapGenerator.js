@@ -18,10 +18,39 @@ class SitemapGenerator {
     
     // Add main domain
     urls.push({
-      loc: `${this.protocol}://www.${this.baseUrl}`,
+      loc: `${this.protocol}://${this.baseUrl}`,
       changefreq: 'weekly',
       priority: '1.0',
       lastmod: new Date().toISOString().split('T')[0]
+    });
+    
+    // Add static pages on root domain
+    const staticPages = [
+      {
+        path: 'headshot-creation-tool',
+        title: 'AI Headshot Creation Tool',
+        priority: '0.9'
+      },
+      {
+        path: 'image-restoration-tool',
+        title: 'Image Restoration Tool',
+        priority: '0.9'
+      },
+      {
+        path: 'image-upscale-tool',
+        title: 'Image Upscale Tool',
+        priority: '0.9'
+      }
+    ];
+    
+    staticPages.forEach(page => {
+      urls.push({
+        loc: `${this.protocol}://${this.baseUrl}/${page.path}`,
+        changefreq: 'weekly',
+        priority: page.priority,
+        lastmod: new Date().toISOString().split('T')[0],
+        title: page.title
+      });
     });
 
     // Add each subdomain
@@ -30,7 +59,7 @@ class SitemapGenerator {
       urls.push({
         loc: `${this.protocol}://${subdomain}.${this.baseUrl}`,
         changefreq: 'weekly',
-        priority: '0.9',
+        priority: '0.8',
         lastmod: new Date().toISOString().split('T')[0],
         title: config.title,
         description: config.description
@@ -102,18 +131,106 @@ class SitemapGenerator {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sitemap - Foxholm AI Image Tools</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #f26522;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .sitemap-section {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        li:last-child {
+            border-bottom: none;
+        }
+        a {
+            color: #f26522;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .url-description {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Sitemap</h1>
-    <ul>`;
+    <h1>Foxholm AI Tools - Sitemap</h1>`;
 
-    // Add each URL as a list item
-    urls.forEach(url => {
-        html += `\n        <li><a href="${url.loc}">${url.title || url.loc}</a></li>`;
+    // Group URLs by type
+    const rootUrls = urls.filter(url => !url.loc.includes('://') || url.loc.includes(`://${this.baseUrl}`));
+    const subdomainUrls = urls.filter(url => url.loc.includes(`://${this.baseUrl}`) === false);
+
+    // Root domain section
+    html += `\n    <div class="sitemap-section">
+        <h2>Main Website</h2>
+        <ul>`;
+    
+    rootUrls.forEach(url => {
+        const path = url.loc.replace(`${this.protocol}://${this.baseUrl}`, '');
+        const displayPath = path || '/';
+        html += `\n            <li>
+                <a href="${url.loc}">${displayPath}</a>
+                ${url.title ? `<span class="url-description">- ${url.title}</span>` : ''}
+            </li>`;
     });
 
-    html += `\n    </ul>
-</body>
+    html += `\n        </ul>
+    </div>`;
+
+    // Subdomain sections
+    const subdomains = subdomainRouter.getAllSubdomains();
+    subdomains.forEach(subdomain => {
+        const subdomainUrlsFiltered = urls.filter(url => url.loc.includes(`${subdomain}.${this.baseUrl}`));
+        if (subdomainUrlsFiltered.length > 0) {
+            const config = subdomainRouter.getSubdomainConfig(subdomain);
+            html += `\n    <div class="sitemap-section">
+        <h2>${config.title}</h2>
+        <ul>`;
+            
+            subdomainUrlsFiltered.forEach(url => {
+                const displayUrl = url.loc.replace(`${this.protocol}://`, '');
+                html += `\n            <li>
+                <a href="${url.loc}">${displayUrl}</a>
+            </li>`;
+            });
+            
+            html += `\n        </ul>
+    </div>`;
+        }
+    });
+
+    html += `\n</body>
 </html>`;
     
     return html;
