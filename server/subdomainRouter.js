@@ -29,9 +29,8 @@ const subdomainConfigs = {
         type: 'radio',
         label: 'Style Adjustments',
         options: [
-          { value: 'suit', label: 'Add Suit/Blazer' },
-          { value: 'business-casual', label: 'Business Casual Clothing' },
-          { value: 'executive', label: 'Formal Executive Clothing' },
+          { value: 'suit', label: 'Add a Suit or Blazer' },
+          { value: 'business-casual', label: 'Add Business Casual Clothing' },
           { value: 'touchup', label: 'Professional Facial Touch-up' }
         ]
       },
@@ -58,10 +57,14 @@ const subdomainConfigs = {
     features: ['Scratch removal', 'Color restoration', 'Damage repair'],
     formFields: {
       colorization: {
-        type: 'toggle',
-        label: 'Colorize Photo',
-        description: 'Automatically add color to black and white photos',
-        default: false
+        type: 'radio',
+        label: 'Adjust Colors',
+        options: [
+          { value: 'maintain', label: 'Maintain Original Color' },
+          { value: 'colorize', label: 'Colorize Photo' },
+          { value: 'desaturate', label: 'Desaturate Photo' },
+        ],
+        required: true
       }
     },
     seo: {
@@ -239,9 +242,6 @@ function generatePrompt(subdomain, options) {
       }
       if (opts.clothing?.includes('business-casual')) {
         prompt += ', wearing business casual attire';
-      }
-      if (opts.clothing?.includes('executive')) {
-        prompt += ', wearing executive attire';
       }
       if (opts.clothing?.includes('touchup')) {
         prompt += ', professional retouching, skin smoothing, blemish removal, even skin tone, refined details';

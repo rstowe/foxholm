@@ -233,8 +233,24 @@ fastify.get('/:filename', async (request, reply) => {
   return reply.code(404).send('File not found');
 });
 
-// API Routes
+// API routes
 fastify.register(async function apiRoutes(fastify) {
+  // Get available subdomains
+  fastify.get('/api/subdomains', async (request, reply) => {
+    try {
+      const subdomains = subdomainRouter.getAllSubdomains();
+      const subdomainConfigs = subdomains.map(subdomain => ({
+        name: subdomain.charAt(0).toUpperCase() + subdomain.slice(1), // Capitalize first letter
+        path: subdomain
+      }));
+      
+      return { success: true, data: subdomainConfigs };
+    } catch (error) {
+      console.error('Error fetching subdomains:', error);
+      reply.status(500).send({ success: false, error: 'Failed to fetch subdomains' });
+    }
+  });
+
   // Main image processing endpoint with increased body limit
   fastify.post('/api/process-image', {
     config: {

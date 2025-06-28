@@ -31,12 +31,29 @@ const FoxholmLogo = ({ className = '' }) => (
 );
 
 function App() {
+  // Get subdomain links for footer
+  const getSubdomainLinks = () => {
+    if (!subdomains || !subdomains.length) return null;
+    
+    return subdomains.map((subdomain) => (
+      <a 
+        key={subdomain.path} 
+        href={`https://${subdomain.path}.foxholm.com`}
+        className="footer-link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {subdomain.name}
+      </a>
+    ));
+  };
   const [subdomainConfig, setSubdomainConfig] = useState(null);
   const [uploadedImage, setUploadedImage] = useState(null);
   const [formData, setFormData] = useState({});
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const [subdomains, setSubdomains] = useState([]);
   const resultRef = useRef(null);
 
   // Scroll to results when they appear
@@ -46,69 +63,118 @@ function App() {
     }
   }, [result]);
 
-  // Fetch subdomain configuration on mount
-  useEffect(() => {
-    fetchSubdomainConfig();
-  }, []);
-
-  // Debug: Log form fields and state changes
-  useEffect(() => {
-    console.log('Form fields:', subdomainConfig?.formFields);
-    console.log('Form data:', formData);
-  }, [subdomainConfig, formData]);
-
-  const fetchSubdomainConfig = async () => {
-    try {
-      // Extract subdomain from the current hostname
-      const hostname = window.location.hostname;
-      let subdomain = null;
-      
-      // Handle local development with subdomains (e.g., headshot.localhost)
-      if (hostname.endsWith('.localhost')) {
-        subdomain = hostname.split('.')[0];
-        if (subdomain === 'localhost') subdomain = null;
-      } 
-      // Handle production domains (e.g., headshot.example.com)
-      else if (hostname.split('.').length > 2) {
-        subdomain = hostname.split('.')[0];
+  // Extract subdomain from hostname
+  const extractSubdomain = (hostname) => {
+    console.log('Extracting subdomain from:', hostname);
+    
+    // Handle local development with subdomains (e.g., restore.localhost:3001)
+    if (hostname.includes('localhost')) {
+      const domainParts = hostname.split('.');
+      // If it's a subdomain like restore.localhost
+      if (domainParts.length > 1 && domainParts[1] === 'localhost') {
+        return domainParts[0];
       }
-      
-      // Build the API URL with the subdomain if available
-      const apiUrl = subdomain 
-        ? `${window.location.origin}/api/subdomain-config?subdomain=${encodeURIComponent(subdomain)}`
-        : `${window.location.origin}/api/subdomain-config`;
-        
-      const response = await fetch(apiUrl, {
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      // If it's localhost with a port
+      if (domainParts[0] === 'localhost') {
+        return null; // Root domain
       }
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setSubdomainConfig(data.config);
-        store.dispatch({
-          type: 'SET_CONFIG',
-          payload: {
-            subdomain: data.subdomain,
-            config: data.config
-          }
-        });
-      } else {
-        setError('Invalid subdomain configuration');
-      }
-    } catch (err) {
-      console.error('Failed to fetch config:', err);
-      setError('Failed to load configuration');
     }
+    
+    // Handle production domains (e.g., restore.example.com)
+    const parts = hostname.split('.');
+    // If we have more than 2 parts (e.g., subdomain.example.com)
+    if (parts.length > 2) {
+      return parts[0];
+    }
+    
+    return null; // No subdomain found
   };
+
+  // Fetch subdomain configuration and available subdomains on mount
+  useEffect(() => {
+    const fetchConfig = async () => {
+      console.log('Fetching subdomain config...');
+      try {
+        const hostname = window.location.hostname;
+        console.log('Current hostname:', hostname);
+        const subdomain = extractSubdomain(hostname);
+        console.log('Extracted subdomain:', subdomain);
+        
+        if (subdomain) {
+          console.log('Fetching config for subdomain:', subdomain);
+          const response = await fetch(`/api/subdomain-config?subdomain=${subdomain}`);
+          console.log('Config response status:', response.status);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Error response:', errorText);
+            throw new Error(`Failed to fetch subdomain config: ${response.status} ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          console.log('Config response data:', result);
+          
+          // Check if the response has the expected format
+          if (result && result.success && result.config) {
+            console.log('Setting subdomain config:', result.config);
+            setSubdomainConfig(result.config);
+            
+            // Update document title and meta description
+            document.title = result.config.seo?.title || 'Foxholm AI';
+            const metaDesc = document.querySelector('meta[name="description"]');
+            if (metaDesc) {
+              metaDesc.setAttribute('content', result.config.seo?.description || '');
+            }
+          } else {
+            console.error('Unexpected response format:', result);
+            throw new Error('Invalid response format from subdomain config API');
+          }
+        }
+      } catch (err) {
+        console.error('Error in fetchConfig:', err);
+        setError('Failed to load tool configuration. Please try again later.');
+      }
+    };
+
+    const fetchSubdomains = async () => {
+      console.log('Fetching subdomains...');
+      try {
+        const response = await fetch('/api/subdomains');
+        console.log('Subdomains response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error(`Failed to fetch subdomains: ${response.status} ${response.statusText}`);
+        }
+        
+        const result = await response.json();
+        console.log('Subdomains response data:', result);
+        
+        // Check if the response has the expected format
+        if (result && result.success && Array.isArray(result.data)) {
+          console.log('Setting subdomains:', result.data);
+          setSubdomains(result.data);
+        } else {
+          console.error('Unexpected response format:', result);
+          throw new Error('Invalid response format from subdomains API');
+        }
+      } catch (err) {
+        console.error('Error in fetchSubdomains:', err);
+        // Fallback to default subdomains if API fails
+        const defaultSubdomains = [
+          { name: 'Headshot', path: 'headshot' },
+          { name: 'Restore', path: 'restore' },
+          { name: 'Upscale', path: 'upscale' }
+        ];
+        console.log('Using default subdomains:', defaultSubdomains);
+        setSubdomains(defaultSubdomains);
+      }
+    };
+
+    fetchConfig();
+    fetchSubdomains();
+  }, []);
 
   const handleImageUpload = (imageData) => {
     setUploadedImage(imageData);
@@ -281,7 +347,8 @@ function App() {
             <FoxholmLogo className="footer-logo" />
             <p>&copy; 2025 Foxholm. Professional AI Image Studio.</p>
             <div className="footer-links">
-              <a href="/sitemap.html">Sitemap</a>
+              {getSubdomainLinks()}
+              <a href="/sitemap.html" className="footer-link">Sitemap</a>
             </div>
           </div>
         </footer>

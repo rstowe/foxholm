@@ -127,6 +127,7 @@ p {
   display: flex;
   align-items: center;
   gap: 1rem;
+  cursor: pointer;
 }
 
 .logo {
@@ -458,20 +459,31 @@ p {
 
 .footer-links {
   display: flex;
-  gap: 2rem;
-  justify-content: center;
+  gap: 1.5rem;
   margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-.app-footer a {
-  color: var(--foxholm-text-tertiary);
+.footer-link {
+  color: var(--foxholm-text-secondary);
   text-decoration: none;
-  font-size: 0.875rem;
-  transition: color var(--transition-fast);
+  transition: all var(--transition-base);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 500;
+  border: 1px solid transparent;
 }
 
-.app-footer a:hover {
+.footer-link:hover {
   color: var(--foxholm-orange);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+}
+
+.footer-link:active {
+  transform: translateY(0);
 }
 
 /* Loading state */

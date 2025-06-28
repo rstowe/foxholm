@@ -35,7 +35,6 @@ const DynamicForm = ({ fields, values, onChange }) => {
           <div key={fieldName} className={fieldClass}>
             <label htmlFor={fieldName} className="control-label">
               {fieldConfig.label}
-              {fieldConfig.required && <span className="required">*</span>}
             </label>
             <select
               id={fieldName}
@@ -58,7 +57,6 @@ const DynamicForm = ({ fields, values, onChange }) => {
           <div key={fieldName} className={fieldClass}>
             <label className="control-label">
               {fieldConfig.label}
-              {fieldConfig.required && <span className="required">*</span>}
             </label>
             <div className="radio-group">
               {fieldConfig.options.map((option) => (
@@ -118,7 +116,6 @@ const DynamicForm = ({ fields, values, onChange }) => {
           <div key={fieldName} className={fieldClass}>
             <label htmlFor={fieldName} className="control-label">
               {fieldConfig.label}
-              {fieldConfig.required && <span className="required">*</span>}
             </label>
             <div className="slider-container">
               <div className="slider-value">
