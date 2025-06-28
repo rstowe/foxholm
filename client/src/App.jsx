@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ImageUploader from './components/ImageUploader';
@@ -37,6 +37,14 @@ function App() {
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
+  const resultRef = useRef(null);
+
+  // Scroll to results when they appear
+  useEffect(() => {
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, [result]);
 
   // Fetch subdomain configuration on mount
   useEffect(() => {
@@ -183,10 +191,12 @@ function App() {
             <div className="logo-section" onClick={() => window.location.href = '/'}>
               <FoxholmLogo />
             </div>
-            {!result && subdomainConfig && (
+            {subdomainConfig && (
               <div className="header-content">
                 <h2>{subdomainConfig.title}</h2>
-                <p className="header-description">{subdomainConfig.description}</p>
+                <p className="header-description">
+                  {result ? 'Your enhanced result is ready!' : subdomainConfig.description}
+                </p>
               </div>
             )}
           </div>
@@ -251,8 +261,8 @@ function App() {
                   )}
                 </>
               ) : (
-                /* Result Display */
-                <div className="result-container glass-card">
+                // Result Display
+                <div className="result-container glass-card" ref={resultRef}>
                   <ResultDisplay
                     result={result}
                     onReset={handleReset}
@@ -271,8 +281,6 @@ function App() {
             <FoxholmLogo className="footer-logo" />
             <p>&copy; 2025 Foxholm. Professional AI Image Studio.</p>
             <div className="footer-links">
-              <a href="/privacy">Privacy</a>
-              <a href="/terms">Terms</a>
               <a href="/sitemap.html">Sitemap</a>
             </div>
           </div>

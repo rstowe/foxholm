@@ -140,17 +140,24 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .upload-area {
-    padding: 2rem 1.5rem;
+    padding: 1rem 0.75rem;
   }
   
   .upload-icon {
-    font-size: 3rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .upload-area h3 {
+    font-size: 1rem;
   }
   
-  .upload-area h3 {
-    font-size: 1.125rem;
+  .upload-area p {
+    font-size:  1rem;
+    display: inline;
   }
   
   .preview-image {

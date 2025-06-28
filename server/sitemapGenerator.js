@@ -65,8 +65,7 @@ class SitemapGenerator {
         description: config.description
       });
 
-      // Add common pages for each subdomain
-      const commonPages = ['privacy', 'terms', 'about'];
+      const commonPages = [];
       commonPages.forEach(page => {
         urls.push({
           loc: `${this.protocol}://${subdomain}.${this.baseUrl}/${page}`,

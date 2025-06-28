@@ -6,14 +6,12 @@ const subdomainConfigs = {
     features: ['Professional styles', 'Background options', 'Multiple formats'],
     formFields: {
       style: {
-        type: 'select',
+        type: 'radio',
         label: 'Style Selection',
         options: [
           { value: 'corporate', label: 'Corporate Professional' },
           { value: 'creative', label: 'Creative Professional' },
           { value: 'linkedin', label: 'LinkedIn Optimized' },
-          { value: 'business-casual', label: 'Business Casual' },
-          { value: 'executive', label: 'Formal Executive' }
         ],
         required: true
       },
@@ -24,26 +22,25 @@ const subdomainConfigs = {
           { value: 'office', label: 'Office Setting' },
           { value: 'solid', label: 'Solid Color' },
           { value: 'gradient', label: 'Gradient' },
-          { value: 'custom', label: 'Custom Upload' }
         ],
         required: true
       },
       clothing: {
-        type: 'checkbox',
-        label: 'Clothing Adjustments',
+        type: 'radio',
+        label: 'Style Adjustments',
         options: [
           { value: 'suit', label: 'Add Suit/Blazer' },
-          { value: 'collar', label: 'Adjust Collar' },
-          { value: 'touchup', label: 'Professional Touch-up' }
+          { value: 'business-casual', label: 'Business Casual Clothing' },
+          { value: 'executive', label: 'Formal Executive Clothing' },
+          { value: 'touchup', label: 'Professional Facial Touch-up' }
         ]
       },
       outputFormat: {
-        type: 'select',
+        type: 'radio',
         label: 'Output Format',
         options: [
           { value: 'square', label: 'Square (LinkedIn)' },
           { value: 'portrait', label: 'Portrait (Resume)' },
-          { value: 'pack', label: 'Multiple Sizes Pack' }
         ],
         required: true
       }
@@ -240,21 +237,29 @@ function generatePrompt(subdomain, options) {
       if (opts.clothing?.includes('suit')) {
         prompt += ', wearing professional suit';
       }
+      if (opts.clothing?.includes('business-casual')) {
+        prompt += ', wearing business casual attire';
+      }
+      if (opts.clothing?.includes('executive')) {
+        prompt += ', wearing executive attire';
+      }
+      if (opts.clothing?.includes('touchup')) {
+        prompt += ', professional retouching, skin smoothing, blemish removal, even skin tone, refined details';
+      }
+      else {
+        prompt += ', maintain facial features and likeness, preserve original facial structure, keep natural skin texture, authentic appearance, same person, minimal retouching, true to original subject, preserve identifying features, adjust facial lighting as needed for asthetics';
+      }
       prompt += ', high quality, sharp focus, professional lighting';
       return prompt;
     },
     
     restore: (opts) => {
-      let prompt = 'Restore this damaged vintage photograph. The image has significant age-related damage including possibly: Heavy fading and uneven exposure Yellow/brown discoloration and age spots Loss of contrast and detail Damaged/faded edges Various stains and marks throughout Please perform professional photo restoration to: Enhance clarity and sharpness while preserving the vintage aesthetic Correct exposure and contrast issues Remove age spots, stains, and discoloration Repair damaged areas and edges Restore facial features and clothing details Maintain the historical authenticity and time period character ';
+      let prompt = 'Restore and enhance this vintage photograph with intelligent reconstruction. The image requires both restoration and creative enhancement. Generative Lighting Reconstruction: Analyze and recreate proper lighting based on era and setting Generate natural shadows and highlights where missing Reconstruct three-dimensional lighting that matches the time period Fill in completely faded areas using contextual lighting patterns Create believable ambient lighting for underexposed regions Generate missing reflections and light interactions on surfaces Advanced Restoration with Creative Enhancement: Intelligently reconstruct missing or severely damaged portions Generate plausible details for areas beyond repair (clothing patterns, background elements) Enhance facial features using period-appropriate beauty standards Recreate texture details that have been lost (fabric, skin, hair) Generate missing environmental context based on visible clues Color and Tone Enhancement: For B&W: Apply rich, period-accurate tonal range with proper contrast For color: Reconstruct color palette using historical color theory Generate color information for faded areas based on context Create atmospheric depth through intelligent color grading Preservation Guidelines: Maintain historical authenticity while taking creative liberties for improvement Generate details that could plausibly have existed in the original Balance restoration with artistic enhancement Keep the soul of the vintage aesthetic while dramatically improving quality Output: Professional museum-quality restoration that looks like the photograph was taken yesterday but developed using period techniques. ';
       
       if (opts.colorization) {
-        prompt += 'naturally, and heavily, colorize the image while matching shading and hues expected. ';
-      } else {
-        prompt += 'If the photo has minimal color, apply a consistent black and white color. If the image is color, repair the color palette to be consistent. ';
-      }
-      
-      prompt += 'Preserve any important details visible in the original Output: High-quality restored vintage photograph that looks like a well-preserved original from the same time period.';
-      
+        prompt += ' Intelligently colorize this black and white/sepia image with historically accurate and vibrant colors. Smart Color Generation: Analyze the era, setting, and context to generate period-appropriate color palettes Use AI inference to determine likely skin tones based on lighting and ethnic features Generate rich, saturated colors while maintaining photographic realism Create natural color variations and gradients (not flat coloring) Add subtle color bleeding and chromatic effects found in vintage color photography Contextual Color Logic: Infer fabric colors based on texture, sheen, and time period fashion Generate environmental colors using seasonal and geographical clues Create believable color relationships between objects (complementary/harmonious) Add authentic color temperature variations based on lighting conditions Generate realistic color depth and atmospheric perspective Enhanced Color Details: Create subtle color variations in skin (blush, undertones, tan lines) Generate natural eye colors with proper iris patterns Add period-appropriate makeup colors if applicable Create realistic hair color with natural highlights and shadows Generate authentic material colors (wood grain, metal patina, fabric dyes) Apply colors confidently and vividly - aim for how the scene would look in perfect color photography of that era, not muted or uncertain coloring.naturally, and heavily, colorize the black and white or sepia tones in the image while matching shading and hues expected. ';
+      } 
+            
       return prompt;
     },
     

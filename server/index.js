@@ -407,26 +407,67 @@ fastify.setNotFoundHandler(async (request, reply) => {
     // Check if this is root domain or subdomain
     if (isRootDomain(request.headers.host)) {
       // On root domain, serve 404 page
-      reply.code(404).send(`
+      const html = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>Page Not Found - Foxholm</title>
           <style>
-            body { font-family: sans-serif; text-align: center; padding: 50px; }
-            h1 { color: #f26522; }
-            a { color: #f26522; text-decoration: none; }
-            a:hover { text-decoration: underline; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+              text-align: center; 
+              padding: 50px 20px;
+              line-height: 1.6;
+              color: #333;
+              margin: 0;
+            }
+            .container {
+              max-width: 600px;
+              margin: 0 auto;
+              padding: 20px;
+              border-radius: 8px;
+              background: #fff;
+              box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            h1 { 
+              color: #f26522; 
+              margin-bottom: 20px;
+            }
+            p {
+              margin-bottom: 20px;
+              color: #666;
+            }
+            .btn {
+              display: inline-block;
+              background: #f26522;
+              color: white;
+              padding: 10px 20px;
+              border-radius: 4px;
+              text-decoration: none;
+              font-weight: 500;
+              transition: background-color 0.3s;
+            }
+            .btn:hover {
+              background: #e05a1a;
+              text-decoration: none;
+            }
           </style>
         </head>
         <body>
-          <h1>404 - Page Not Found</h1>
-          <p>The page you're looking for doesn't exist.</p>
-          <p><a href="/">Return to Homepage</a></p>
+          <div class="container">
+            <h1>404 - Page Not Found</h1>
+            <p>We couldn't find the page you were looking for. The page may have been moved, deleted, or never existed.</p>
+            <a href="/" class="btn">Return to Homepage</a>
+          </div>
         </body>
-        </html>
-      `);
+        </html>`;
+      
+      return reply
+        .code(404)
+        .header('Content-Type', 'text/html; charset=utf-8')
+        .send(html);
     } else {
       // On subdomains, serve the React app with SEO-optimized HTML for client-side routing
       const subdomain = subdomainRouter.extractSubdomain(request.headers.host);

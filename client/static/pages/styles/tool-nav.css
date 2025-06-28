@@ -1,0 +1,55 @@
+/* Tool Navigation Buttons */
+.tool-nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.btn-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-tool:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.btn-tool.active {
+    background: var(--foxholm-orange);
+    border-color: var(--foxholm-orange);
+    color: white;
+    font-weight: 600;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    .tool-nav-buttons {
+        flex-wrap: wrap;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+        text-align: center;
+    }
+}

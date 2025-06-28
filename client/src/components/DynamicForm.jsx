@@ -2,6 +2,23 @@ import React from 'react';
 import './DynamicForm.css';
 
 const DynamicForm = ({ fields, values, onChange }) => {
+  // Initialize required fields with their first option if not already set
+  React.useEffect(() => {
+    const initialValues = {};
+    Object.entries(fields).forEach(([fieldName, fieldConfig]) => {
+      if (fieldConfig.required && fieldConfig.options?.length > 0 && !values[fieldName]) {
+        initialValues[fieldName] = fieldConfig.options[0].value;
+      }
+    });
+    
+    if (Object.keys(initialValues).length > 0) {
+      // Call onChange for each initialized value
+      Object.entries(initialValues).forEach(([fieldName, value]) => {
+        onChange(fieldName, value);
+      });
+    }
+  }, []);
+
   const renderField = (fieldName, fieldConfig) => {
     const value = values[fieldName] || fieldConfig.default || '';
     
