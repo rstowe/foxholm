@@ -239,10 +239,15 @@ fastify.register(async function apiRoutes(fastify) {
   fastify.get('/api/subdomains', async (request, reply) => {
     try {
       const subdomains = subdomainRouter.getAllSubdomains();
-      const subdomainConfigs = subdomains.map(subdomain => ({
-        name: subdomain.charAt(0).toUpperCase() + subdomain.slice(1), // Capitalize first letter
-        path: subdomain
-      }));
+      const subdomainConfigs = subdomains.map(subdomain => {
+        const config = subdomainRouter.getSubdomainConfig(subdomain);
+        return {
+          name: subdomain.charAt(0).toUpperCase() + subdomain.slice(1), // Capitalize first letter
+          path: subdomain,
+          emoji: config?.emoji || '✨',
+          title: config?.title || subdomain
+        };
+      });
       
       return { success: true, data: subdomainConfigs };
     } catch (error) {

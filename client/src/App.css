@@ -457,6 +457,35 @@ p {
   margin-bottom: 0.5rem;
 }
 
+.privacy-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: var(--foxholm-bg-tertiary);
+  padding: 0.5rem 0;
+  margin: 0;
+  text-align: center;
+  color: var(--foxholm-text-secondary);
+  font-size: 0.875rem;
+}
+
+.privacy-banner p {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.privacy-banner .separator {
+  color: var(--foxholm-text-tertiary);
+  opacity: 0.5;
+  font-size: 1.2em;
+  line-height: 1;
+}
+
 .footer-links {
   display: flex;
   gap: 1.5rem;

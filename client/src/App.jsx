@@ -42,8 +42,9 @@ function App() {
         className="footer-link"
         target="_blank"
         rel="noopener noreferrer"
+        title={subdomain.title}
       >
-        {subdomain.name}
+        {subdomain.emoji} {subdomain.title}
       </a>
     ));
   };
@@ -352,11 +353,19 @@ function App() {
 
         <footer className="app-footer">
           <div className="footer-content">
+            <div className="privacy-banner">
+              <p>
+                <span>No sign-ups</span>
+                <span className="separator">|</span>
+                <span>We do not store your images</span>
+                <span className="separator">|</span>
+                <span>No cookies</span>
+              </p>
+            </div>
             <FoxholmLogo className="footer-logo" />
             <p>&copy; 2025 Foxholm. Professional AI Image Studio.</p>
             <div className="footer-links">
               {getSubdomainLinks()}
-              <a href="/sitemap.html" className="footer-link">Sitemap</a>
             </div>
           </div>
         </footer>
