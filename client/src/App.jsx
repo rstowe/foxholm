@@ -199,6 +199,14 @@ function App() {
     setError(null);
 
     try {
+      // Extract subdomain from current URL
+      const hostname = window.location.hostname;
+      const subdomain = extractSubdomain(hostname);
+      
+      if (!subdomain) {
+        throw new Error('Could not determine subdomain from URL');
+      }
+
       const apiUrl = `${window.location.origin}/api/process-image`;
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -208,7 +216,7 @@ function App() {
         },
         credentials: 'include',
         body: JSON.stringify({
-          subdomain: store.getState().app.subdomain,
+          subdomain: subdomain,
           imageData: uploadedImage,
           options: formData
         })

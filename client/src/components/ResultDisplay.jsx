@@ -149,12 +149,6 @@ const ResultDisplay = ({ result, onReset }) => {
         </button>
         <button
           className="btn btn-secondary"
-          onClick={shareImage}
-        >
-          🔗 Share
-        </button>
-        <button
-          className="btn btn-secondary"
           onClick={onReset}
         >
           🔄 Try Another
