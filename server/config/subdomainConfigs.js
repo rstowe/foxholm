@@ -1,10 +1,10 @@
 // Subdomain configurations
+const translations = require('../translations/en');
+
 const subdomainConfigs = {
   headshot: {
     emoji: '📸',
-    title: 'AI Professional Headshot Generator',
-    description: 'Transform any photo into a professional headshot in seconds',
-    features: ['Professional styles', 'Background options', 'Multiple formats'],
+    ...translations.headshot,
     promptGenerator: (opts) => {
       let prompt = `Professional headshot portrait, ${opts.style || 'corporate'} style`;
       if (opts.background) {
@@ -27,56 +27,33 @@ const subdomainConfigs = {
     },
     formFields: {
       style: {
-        type: 'radio',
-        label: 'Style Selection',
-        options: [
-          { value: 'corporate', label: 'Corporate Professional' },
-          { value: 'creative', label: 'Creative Professional' },
-          { value: 'linkedin', label: 'LinkedIn Optimized' },
-        ],
+        type: translations.fieldTypes.radio,
+        ...translations.headshot.formFields.style,
         required: true
       },
       background: {
-        type: 'radio',
-        label: 'Background Preference',
-        options: [
-          { value: 'office', label: 'Office Setting' },
-          { value: 'solid', label: 'Solid Color' },
-          { value: 'gradient', label: 'Gradient' },
-        ],
+        type: translations.fieldTypes.radio,
+        ...translations.headshot.formFields.background,
         required: true
       },
       clothing: {
-        type: 'radio',
-        label: 'Style Adjustments',
-        options: [
-          { value: 'suit', label: 'Add a Suit or Blazer' },
-          { value: 'business-casual', label: 'Add Business Casual Clothing' },
-          { value: 'touchup', label: 'Professional Facial Touch-up' }
-        ]
+        type: translations.fieldTypes.radio,
+        ...translations.headshot.formFields.clothing
       },
       outputFormat: {
-        type: 'radio',
-        label: 'Output Format',
-        options: [
-          { value: 'square', label: 'Square (LinkedIn)' },
-          { value: 'portrait', label: 'Portrait (Resume)' },
-        ],
+        type: translations.fieldTypes.radio,
+        ...translations.headshot.formFields.outputFormat,
         required: true
       }
     },
     seo: {
-      title: 'AI Professional Headshot Generator - Free Online Tool | Foxholm',
-      description: 'Transform any photo into a professional headshot in seconds. Perfect for LinkedIn, resumes, and business profiles. No photographer needed.',
-      keywords: ['AI headshot generator', 'professional headshot AI', 'LinkedIn photo maker']
+      ...translations.headshot.seo
     }
   },
   
   restore: {
     emoji: '🖼️',
-    title: 'AI Photo Restoration & Enhancement',
-    description: 'Restore old, damaged, or faded photos using advanced AI',
-    features: ['Scratch removal', 'Color restoration', 'Damage repair'],
+    ...translations.restore,
     promptGenerator: (opts) => {
         let prompt = '';
         
@@ -95,29 +72,19 @@ const subdomainConfigs = {
     },
     formFields: {
       colorization: {
-        type: 'radio',
-        label: 'Adjust Colors',
-        options: [
-          { value: 'maintain', label: 'Maintain Original Color' },
-          { value: 'recreate', label: 'Recreate Vintage Photo' },
-          { value: 'colorize', label: 'Colorize Photo' },
-          { value: 'desaturate', label: 'Desaturate Photo' },
-        ],
+        type: translations.fieldTypes.radio,
+        ...translations.restore.formFields.colorization,
         required: true
       }
     },
     seo: {
-      title: 'AI Photo Restoration - Restore Old & Damaged Photos Online | Foxholm',
-      description: 'Instantly restore old, damaged, or faded photos using AI. Fix scratches, tears, and discoloration. Bring family memories back to life.',
-      keywords: ['restore old photos AI', 'photo restoration online', 'fix damaged photos']
+      ...translations.restore.seo
     }
   },
   
   upscale: {
     emoji: '🔍',
-    title: 'AI Image Upscaling',
-    description: 'Enhance image resolution up to 8x without losing quality',
-    features: ['Up to 8x resolution', 'Smart enhancement', 'Noise reduction'],
+    ...translations.upscale,
     promptGenerator: (opts) => {
       let prompt = `Upscale image to ${opts.targetResolution || '2x'} resolution`;
       if (opts.enhancementType) {
@@ -134,50 +101,30 @@ const subdomainConfigs = {
     },
     formFields: {
       targetResolution: {
-        type: 'select',
-        label: 'Target Resolution',
-        options: [
-          { value: '2x', label: '2x (Recommended)' },
-          { value: '4x', label: '4x (High Quality)' },
-          { value: '8x', label: '8x (Maximum)' },
-          { value: 'custom', label: 'Custom Size' }
-        ],
+        type: translations.fieldTypes.select,
+        ...translations.upscale.formFields.targetResolution,
         required: true
       },
       enhancementType: {
-        type: 'radio',
-        label: 'Enhancement Type',
-        options: [
-          { value: 'photo', label: 'Photo (Faces & Details)' },
-          { value: 'artwork', label: 'Artwork (Illustrations)' },
-          { value: 'text', label: 'Text (Documents)' },
-          { value: 'general', label: 'General' }
-        ],
+        type: translations.fieldTypes.radio,
+        ...translations.upscale.formFields.enhancementType,
         required: true
       },
       noiseReduction: {
-        type: 'slider',
-        label: 'Noise Reduction',
-        min: 0,
-        max: 100,
-        step: 10,
-        unit: '%',
+        type: translations.fieldTypes.slider,
+        ...translations.upscale.formFields.noiseReduction,
+        ...translations.sliderSettings,
         default: 50
       },
       sharpeningLevel: {
-        type: 'slider',
-        label: 'Sharpening Level',
-        min: 0,
-        max: 100,
-        step: 10,
-        unit: '%',
+        type: translations.fieldTypes.slider,
+        ...translations.upscale.formFields.sharpeningLevel,
+        ...translations.sliderSettings,
         default: 30
       }
     },
     seo: {
-      title: 'AI Image Upscaler - Enhance Resolution 8x Free | Foxholm',
-      description: 'Upscale images up to 8x without losing quality. Perfect for printing, web use, or enhancing old photos. Powered by advanced AI.',
-      keywords: ['AI image upscaler', 'increase image resolution', 'upscale photo online']
+      ...translations.upscale.seo
     }
   }
 };
