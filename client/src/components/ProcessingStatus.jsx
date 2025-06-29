@@ -1,17 +1,14 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ProcessingStatus.css';
 
 const ProcessingStatus = () => {
+  const { t } = useTranslation();
   const [progress, setProgress] = useState(0);
-  const [message, setMessage] = useState('Initializing...');
-
-  const messages = [
-    'Uploading image...',
-    'Analyzing content...',
-    'Applying AI enhancements...',
-    'Generating result...',
-    'Finalizing...'
-  ];
+  const [message, setMessage] = useState(t('common.processingStatus.messages[0]'));
+  
+  // Get all messages from translations
+  const messages = t('common.processingStatus.messages', { returnObjects: true });
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -37,8 +34,8 @@ const ProcessingStatus = () => {
         {/* Video Ad Placeholder */}
         <div className="video-ad-placeholder">
           <div className="ad-content">
-            <span>Advertisement</span>
-            <div className="ad-dimensions">360 x 450</div>
+            <span>{t('common.processingStatus.advertisement')}</span>
+            <div className="ad-dimensions">{t('common.processingStatus.adDimensions')}</div>
           </div>
         </div>
         
@@ -59,7 +56,7 @@ const ProcessingStatus = () => {
               <span className="loading-dot"></span>
             </span>
           </p>
-          <p className="processing-time">Processing time: 20-30 seconds</p>
+          <p className="processing-time">{t('common.processingStatus.timeEstimate')}</p>
         </div>
       </div>
     </div>

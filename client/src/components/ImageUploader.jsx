@@ -1,7 +1,9 @@
 import React, { useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ImageUploader.css';
 
 const ImageUploader = ({ onImageUpload, uploadedImage }) => {
+  const { t } = useTranslation();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState(null);
@@ -15,13 +17,15 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
 
     // Validate file type
     if (!ALLOWED_TYPES.includes(file.type)) {
-      setError('Invalid file type. Please upload a JPG, PNG, or WebP image.');
+      setError(t('common.imageUploader.errors.invalidType'));
       return;
     }
 
     // Validate file size
     if (file.size > MAX_FILE_SIZE) {
-      setError(`File is too large. Maximum size is ${MAX_FILE_SIZE / (1024 * 1024)}MB.`);
+      setError(t('common.imageUploader.errors.fileTooLarge', {
+        maxSize: MAX_FILE_SIZE / (1024 * 1024)
+      }));
       return;
     }
 
@@ -34,7 +38,9 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
       
       // Validate image dimensions
       if (img.width > MAX_DIMENSION || img.height > MAX_DIMENSION) {
-        setError(`Image dimensions are too large. Maximum size is ${MAX_DIMENSION}x${MAX_DIMENSION}px.`);
+        setError(t('common.imageUploader.errors.dimensionsTooLarge', {
+          maxDimension: MAX_DIMENSION
+        }));
         return;
       }
       
@@ -44,14 +50,14 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
         onImageUpload(reader.result);
       };
       reader.onerror = () => {
-        setError('Failed to process image. Please try another file.');
+        setError(t('common.imageUploader.errors.processError'));
       };
       reader.readAsDataURL(file);
     };
     
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      setError('Invalid image file. Please try another file.');
+      setError(t('common.imageUploader.errors.invalidFile'));
     };
     
     img.src = objectUrl;
@@ -110,8 +116,8 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
           
           <div className="upload-content">
             <div className="upload-icon">📸</div>
-            <p>Drop your image here</p>
-            <p className="upload-hint">or click to select • JPG, PNG, GIF</p>
+            <p>{t('common.imageUploader.dropText')}</p>
+            <p className="upload-hint">{t('common.imageUploader.clickText')}</p>
           </div>
         </div>
       ) : (
@@ -123,7 +129,7 @@ const ImageUploader = ({ onImageUpload, uploadedImage }) => {
               onClick={handleClick}
               type="button"
             >
-              Change Image
+              {t('common.imageUploader.changeButton')}
             </button>
           </div>
           <input

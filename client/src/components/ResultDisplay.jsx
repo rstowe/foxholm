@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import './ResultDisplay.css';
 
 const ResultDisplay = ({ result, onReset }) => {
+  const { t } = useTranslation();
   const resultRef = useRef(null);
   const [showComparison, setShowComparison] = useState(true);
   const [downloadComplete, setDownloadComplete] = useState(false);
@@ -55,8 +57,8 @@ const ResultDisplay = ({ result, onReset }) => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: 'Check out my AI-enhanced image!',
-          text: 'Created with Foxholm AI Image Tools',
+          title: t('common.resultDisplay.share.title'),
+          text: t('common.resultDisplay.share.text'),
           url: window.location.href
         });
       } catch (error) {
@@ -65,7 +67,7 @@ const ResultDisplay = ({ result, onReset }) => {
     } else {
       // Fallback - copy link to clipboard
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copied to clipboard!');
+      alert(t('common.resultDisplay.share.linkCopied'));
     }
   };
 
@@ -78,20 +80,20 @@ const ResultDisplay = ({ result, onReset }) => {
       role="region"
       aria-live="polite"
       aria-atomic="true"
-      aria-label="Image processing results"
+      aria-label={t('common.resultDisplay.aria.regionLabel')}
     >
       <div className="result-content">
         {showComparison ? (
           <div className="comparison-view">
             {/* Enhanced image first for mobile */}
             <div className="image-container processed">
-              <h4>Enhanced</h4>
-              <img src={result.processedImage} alt="Enhanced" />
+              <h4>{t('common.resultDisplay.comparisonView.enhanced')}</h4>
+              <img src={result.processedImage} alt={t('common.resultDisplay.comparisonView.enhanced')} />
             </div>
             <div className="comparison-divider"></div>
             <div className="image-container original">
-              <h4>Original</h4>
-              <img src={result.originalImage} alt="Original" />
+              <h4>{t('common.resultDisplay.comparisonView.original')}</h4>
+              <img src={result.originalImage} alt={t('common.resultDisplay.comparisonView.original')} />
             </div>
           </div>
         ) : (
@@ -105,37 +107,43 @@ const ResultDisplay = ({ result, onReset }) => {
             className={`toggle-btn ${showComparison ? 'active' : ''}`}
             onClick={() => setShowComparison(true)}
           >
-            Compare
+            {t('common.resultDisplay.comparisonView.compare')}
           </button>
           <button
             className={`toggle-btn ${!showComparison ? 'active' : ''}`}
             onClick={() => setShowComparison(false)}
           >
-            Result Only
+            {t('common.resultDisplay.comparisonView.resultOnly')}
           </button>
         </div>
       </div>
 
       {result.processingDetails && (
         <div className="processing-details">
-          <h4>Processing Details</h4>
+          <h4>{t('common.resultDisplay.processingDetails.title')}</h4>
           <ul>
             {result.originalDimensions && (
               <li>
-                Original: {result.originalDimensions.width} × {result.originalDimensions.height}
+                {t('common.resultDisplay.processingDetails.original')}: {t('common.resultDisplay.processingDetails.dimensions', {
+                  width: result.originalDimensions.width,
+                  height: result.originalDimensions.height
+                })}
               </li>
             )}
             {result.targetDimensions && (
               <li>
-                Enhanced: {result.targetDimensions.width} × {result.targetDimensions.height}
+                {t('common.resultDisplay.processingDetails.enhanced')}: {t('common.resultDisplay.processingDetails.dimensions', {
+                  width: result.targetDimensions.width,
+                  height: result.targetDimensions.height
+                })}
               </li>
             )}
             {result.analysis && (
               <li>
-                Detected: {result.analysis.damageDetected.join(', ')}
+                {t('common.resultDisplay.processingDetails.detected')}: {result.analysis.damageDetected.join(', ')}
               </li>
             )}
-            <li>Processed at: {new Date(result.processingDetails.timestamp).toLocaleString()}</li>
+            <li>{t('common.resultDisplay.processingDetails.processedAt')}: {new Date(result.processingDetails.timestamp).toLocaleString()}</li>
           </ul>
         </div>
       )}
@@ -145,24 +153,24 @@ const ResultDisplay = ({ result, onReset }) => {
           className={`btn btn-download ${downloadComplete ? 'download-complete' : ''}`}
           onClick={handleDownload}
         >
-          {downloadComplete ? '✓ Downloaded!' : '⬇ Download Image'}
+          {downloadComplete ? t('common.resultDisplay.actions.downloadComplete') : t('common.resultDisplay.actions.download')}
         </button>
         <button
           className="btn btn-secondary"
           onClick={onReset}
         >
-          🔄 Try Another
+          {t('common.resultDisplay.actions.tryAnother')}
         </button>
       </div>
 
       <div className="result-footer">
         <p className="satisfaction-prompt">
-          Happy with the result? Share your experience!
+          {t('common.resultDisplay.share.satisfactionPrompt')}
         </p>
         <div className="social-links">
-          <a href="#" className="social-link">Twitter</a>
-          <a href="#" className="social-link">Facebook</a>
-          <a href="#" className="social-link">Instagram</a>
+          <a href="#" className="social-link">{t('common.resultDisplay.share.social.twitter')}</a>
+          <a href="#" className="social-link">{t('common.resultDisplay.share.social.facebook')}</a>
+          <a href="#" className="social-link">{t('common.resultDisplay.share.social.instagram')}</a>
         </div>
       </div>
     </section>

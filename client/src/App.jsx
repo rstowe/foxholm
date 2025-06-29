@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
+import './i18n';
 import ImageUploader from './components/ImageUploader';
 import DynamicForm from './components/DynamicForm';
 import ProcessingStatus from './components/ProcessingStatus';
 import ResultDisplay from './components/ResultDisplay';
+import LanguageSelector from './components/LanguageSelector';
 import './App.css';
 
 // Redux store
@@ -22,15 +25,19 @@ const store = configureStore({
 });
 
 // Foxholm Logo Component
-const FoxholmLogo = ({ className = '' }) => (
-  <img 
-    src="/logo.png" 
-    alt="Foxholm" 
-    className={`logo ${className}`}
-  />
-);
+const FoxholmLogo = ({ className = '' }) => {
+  const { t } = useTranslation();
+  return (
+    <img 
+      src="/logo.png" 
+      alt={t('common.app.altLogo')} 
+      className={`logo ${className}`}
+    />
+  );
+};
 
 function App() {
+  const { t } = useTranslation();
   // Get subdomain links for footer
   const getSubdomainLinks = () => {
     if (!subdomains || !subdomains.length) return null;
@@ -121,7 +128,7 @@ function App() {
             setSubdomainConfig(result.config);
             
             // Update document title and meta description
-            document.title = result.config.seo?.title || 'Foxholm AI';
+            document.title = result.config.seo?.title || t('common.app.title');
             const metaDesc = document.querySelector('meta[name="description"]');
             if (metaDesc) {
               metaDesc.setAttribute('content', result.config.seo?.description || '');
@@ -163,11 +170,7 @@ function App() {
       } catch (err) {
         console.error('Error in fetchSubdomains:', err);
         // Fallback to default subdomains if API fails
-        const defaultSubdomains = [
-          { name: 'Headshot', path: 'headshot' },
-          { name: 'Restore', path: 'restore' },
-          { name: 'Upscale', path: 'upscale' }
-        ];
+        const defaultSubdomains = t('common.defaultSubdomains', { returnObjects: true });
         console.log('Using default subdomains:', defaultSubdomains);
         setSubdomains(defaultSubdomains);
       }
@@ -192,7 +195,7 @@ function App() {
 
   const handleSubmit = async () => {
     if (!uploadedImage) {
-      setError('Please upload an image first');
+      setError(t('common.error.noImage'));
       return;
     }
 
@@ -205,7 +208,7 @@ function App() {
       const subdomain = extractSubdomain(hostname);
       
       if (!subdomain) {
-        throw new Error('Could not determine subdomain from URL');
+        throw new Error(t('common.error.subdomain'));
       }
 
       const apiUrl = `${window.location.origin}/api/process-image`;
@@ -228,11 +231,11 @@ function App() {
       if (data.success) {
         setResult(data.data);
       } else {
-        setError(data.error || 'Processing failed');
+        setError(data.error || t('common.error.processing'));
       }
     } catch (err) {
       console.error('Processing error:', err);
-      setError('Failed to process image');
+      setError(t('common.error.processImage'));
     } finally {
       setProcessing(false);
     }
@@ -249,7 +252,7 @@ function App() {
     return (
       <div className="app-loading">
         <div className="spinner"></div>
-        <p>Loading Foxholm Studio...</p>
+        <p>{t('common.loading')}</p>
       </div>
     );
   }
@@ -263,20 +266,21 @@ function App() {
         {/* Modern Dark Header */}
         <header className="app-header">
           <div className="header-container">
-            <div className="logo-section" onClick={() => window.location.href = '/'}>
-              <FoxholmLogo />
-            </div>
-            {subdomainConfig && (
+              <div className="logo-section" onClick={() => window.location.href = '/'}>
+                <FoxholmLogo />
+              </div>
+              <LanguageSelector />
+              {subdomainConfig && (
               <div className="header-content">
                 <h2>{subdomainConfig.title}</h2>
                 <p className="header-description">
-                  {result ? 'Your enhanced result is ready!' : subdomainConfig.description}
+                  {subdomainConfig.description}
                 </p>
               </div>
             )}
+            
           </div>
         </header>
-
         <main className="app-main">
           <div className="app-container">
             {/* Main content grid */}
@@ -304,7 +308,7 @@ function App() {
                         />
                       ) : (
                         <div className="no-fields-message">
-                          No customization options available for this service.
+                          {t('common.messages.noCustomization')}
                         </div>
                       )}
                       
@@ -318,10 +322,10 @@ function App() {
                         {processing ? (
                           <>
                             <span className="spinner-small"></span>
-                            Processing...
+                            {t('common.buttons.processing')}
                           </>
                         ) : (
-                          'Generate Enhanced Image'
+                          t('common.buttons.generate')
                         )}
                       </button>
                     </div>
@@ -355,15 +359,15 @@ function App() {
           <div className="footer-content">
             <div className="privacy-banner">
               <p>
-                <span>No sign-ups</span>
-                <span className="separator">|</span>
-                <span>We do not store your images</span>
-                <span className="separator">|</span>
-                <span>No cookies</span>
+                <span>{t('privacy.noSignups')}</span>
+                <span className="separator">{t('common.separator')}</span>
+                <span>{t('privacy.noImageStorage')}</span>
+                <span className="separator">{t('common.separator')}</span>
+                <span>{t('privacy.noCookies')}</span>
               </p>
             </div>
             <FoxholmLogo className="footer-logo" />
-            <p>&copy; 2025 Foxholm. Professional AI Image Studio.</p>
+            <p>{t('footer.copyright')}</p>
             <div className="footer-links">
               {getSubdomainLinks()}
             </div>
